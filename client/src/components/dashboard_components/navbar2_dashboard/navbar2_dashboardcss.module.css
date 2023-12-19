@@ -1,0 +1,155 @@
+.search_wrap{
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid #202225;
+    box-sizing: content-box;
+}
+
+.search{
+    display: flex;
+    justify-content: flex-start;
+    text-indent: 10px;
+    align-items: center;
+    width: 90%;
+    height: 65%;
+    background-color: #202225;
+    color: #A3A6AA;
+    border-radius: 5px;
+    font-size: .9rem;
+    cursor: pointer;
+}
+
+.friends_wrap{
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.friends{
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    /* color: #96989D; */
+    font-size: medium;
+    width: 95%;
+    height: 45px;
+    border-radius: 5px;
+    background-color: #4b4d50;
+    color: white;
+}
+
+.friends_icon {
+    margin-left: 1rem;
+}
+
+.friends img{
+    height: 50%;
+    width: fit-content;
+}
+
+
+.heading{
+    display: grid;
+    grid-template-columns: 85% 15%;
+    color: #B9BBBE;
+    font-size: .8rem;
+    margin-bottom: 1rem;
+}
+
+#plus{
+    display: flex;
+    color: white;
+    cursor: pointer;
+}
+
+
+#text{
+    display: flex;
+    align-items: center;
+    margin-left: 1.5rem;
+    cursor: pointer;
+}
+
+#text:hover{
+    color: white;
+}
+
+.friend_details_wrap{
+    margin-bottom: .2rem;
+}
+
+.friends_area{
+    border: 2px solid white;
+    height: 400px;
+}
+
+.friend_details{
+    height: 48px;
+    display: flex;
+    cursor: pointer;
+    margin: 0 1rem 0 1rem ;
+}
+
+.friend_details:hover{
+    background-color: #4b4d50;
+    border-radius: 5px;
+}
+
+#profile_wrap{
+    width: 20%;
+    margin-left: 3%;
+    display: flex;
+    align-items: center;
+}
+
+.profile_pic{
+    height: 35px;
+    width: 35px;
+    position: relative;
+}
+
+.online_status{
+    background-color: #2F3136;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    margin-left: 60%;
+    position: relative;
+    z-index: 1;
+    padding: .1rem;
+    bottom: 30%;
+}
+
+/* this is here to affect the child element when parent element is hovered */
+.friend_details:hover .online_status{
+    background-color: #4b4d50;
+}
+
+
+.offline_icon{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    color: #747F8D;
+    font-weight: 900;
+}
+
+
+
+.profile_pic img{
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+}
+
+.name{
+    display: flex;
+    align-items: center;
+    width: 80%;
+    color: #DCDDD9;
+    font-weight: 500;
+    font-size: .9rem;
+}
