@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Discord Clone Backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "build": "react-scripts build"
+  },
+  "author": "shunnu",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.6.1",
+    "nanoid": "^4.0.0",
+    "nodemailer": "^6.7.8",
+    "nodemon": "^2.0.19",
+    "react-scripts": "^5.0.1",
+    "shortid": "^2.2.16",
+    "socket.io": "^4.5.4"
+  }
+}
