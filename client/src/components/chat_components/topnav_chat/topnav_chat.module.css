@@ -1,0 +1,36 @@
+.main_wrap{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-inline: 1rem;
+    color: #B9BBBE;
+}
+
+#left{
+    display: flex;
+    gap: .5rem;
+    cursor:default;
+}
+
+#channel_name{
+    color: white;
+    font-weight: 600;
+}
+
+#right{
+    display: flex;
+    gap: 1rem;
+    cursor: pointer;
+}
+
+#right input{
+    background-color: #202225;
+    border: none;
+    border-radius: 5px;
+    text-indent: .5rem;
+}
+
+.right_comps:hover{
+    color: white;
+}

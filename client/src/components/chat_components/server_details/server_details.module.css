@@ -1,0 +1,171 @@
+.categories{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .3rem;
+    color: #939698;
+    font-size: .8rem;
+    margin-top: 1rem;
+    margin-right: .9rem;
+    cursor: pointer;
+    
+}
+
+.categories_left:hover{
+    color: white;
+}
+
+.channels_wrap{
+    width: 90%;
+    margin: auto;
+    display: flex;
+    height: 40px;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.channels_wrap:hover{
+    background-color: #4F545C66;
+
+}
+
+.channels{
+    color: #939698;
+    font-weight: 500;
+    font-size: .9rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    cursor: pointer;
+    margin-left: 1rem;
+    gap: .2rem;
+}
+
+.channels:hover{
+    color: white;
+}
+
+
+#modal_main_wrap{
+    max-width: 450px;
+}
+
+
+.modal_main{
+    background-color: #36393F;
+    padding: 1rem;    
+}
+
+.modal_comps{
+    margin-bottom: .5rem;
+}
+
+#modal_header{
+    margin-bottom: 1rem;
+}
+
+#primary_heading{
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 650;
+}
+
+#secondary_heading{
+    color: #A0A3A6;
+    font-size: .8rem;
+}
+
+#channel_type{
+    color: #bcbfc3;
+    font-weight: 600;
+    font-size: .9rem;
+}
+
+.channel_type_wrap{
+    display: grid;
+    grid-template-columns: 10% 80% 20%;
+    align-items: center;
+    margin-top: .5rem;
+    padding: .3rem;
+    border-radius: 5px;
+    background-color: #2F3136;
+    cursor: pointer;
+}
+
+.channel_type_wrap:hover{
+    background-color: #555558;
+}
+
+.channel_type_text{
+    color: white;
+}
+
+.channel_type_disc_text{
+    font-size: .9rem;
+}
+
+
+#channel_name{
+    color: white;
+    font-size: .8rem;
+    font-weight: 600;
+    margin-block: 1rem;
+    
+}
+
+.input_div{
+    display: flex;
+    align-items: center;
+    background-color: #202225;
+    margin-top: .5rem;
+    border-radius: 5px;
+    padding: .5rem;
+}
+
+#channel_name input{
+    background-color: #202225;
+    border: none;
+    width: 100%;
+    text-indent: .5rem;
+    caret-color: white;  
+    font-size: 1rem;
+    color: #A0A3A6
+}
+
+#channel_name input:focus{
+    outline: none;
+}
+
+#channel_name input::placeholder{
+    font-size: 1rem;
+}
+
+#modal_buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    align-items: center;
+}
+
+.buttons{
+    cursor: pointer;
+}
+
+#cancel_button{
+    background-color: inherit;
+    border: none;
+    color: white;
+}
+
+#create_button{
+    border: none;
+    color: white;
+    background-color: blue;
+    padding: .3rem;
+    border-radius: 3px;
+}
+
+#create_button:hover{
+    background-color: rgb(71, 71, 243);
+}
