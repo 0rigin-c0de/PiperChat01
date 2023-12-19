@@ -1,0 +1,34 @@
+.main{
+    height: 100%;
+}
+
+.main_wrap{
+    margin-inline: 1rem;
+    margin-top: 1rem;
+
+}
+
+.members_length{
+    color: #B9B9B9;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.members{
+    height: 100%;
+}
+
+.individual_member{
+    height: 48px;
+    margin-top: .5rem;
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+}
+
+.individual_member img{
+    height: 70%;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
