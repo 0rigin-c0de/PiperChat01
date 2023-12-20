@@ -1,0 +1,62 @@
+.main {
+  background-color: #2f3136;
+  height: 100vh;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 600;
+  position: relative;
+}
+
+#footer {
+  position: absolute;
+  height: 48px;
+  bottom: 0;
+  width: auto;
+  display: grid;
+  grid-template-columns: 2fr 3.5fr 2.5fr;
+  background-color: #292b2f;
+}
+.footer_comps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+#profile_options {
+  box-sizing: content-box;
+}
+
+.icons {
+  cursor: pointer;
+  padding: 3px;
+  color: #b9bbbe;
+}
+
+.icons:hover {
+  background-color: hsla(217, calc((1, 1) * 7.6%), 33.5%, 0.6);
+  border-radius: 5px;
+}
+
+#profile img {
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+}
+
+#profile_name_wrap {
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#tag {
+  color: #b9bbbe;
+  font-weight: 500;
+}
+
+#profile_options {
+  gap: 0.5rem;
+  margin-right: 0.5rem;
+}
