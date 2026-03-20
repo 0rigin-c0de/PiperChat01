@@ -10,6 +10,7 @@ import {
   addUserToServer,
   checkServerInUser,
 } from "../services/serverService.js";
+import { getIO } from "../socket/runtime.js";
 
 const router = express.Router();
 
@@ -120,6 +121,16 @@ router.post("/accept_invite", async (req, res) => {
     server_details.invite_details,
     "member"
   );
+
+  const io = getIO();
+  if (io) {
+    io.to(String(id)).emit("user_servers_updated", { user_id: String(id) });
+    io.to(`server:${String(server_id)}`).emit("server_updated", {
+      server_id: String(server_id),
+      reason: "member_joined",
+      user_id: String(id),
+    });
+  }
   res.json({ status: 200 });
 });
 

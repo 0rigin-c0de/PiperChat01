@@ -105,6 +105,23 @@ function attachSocketHandlers(io) {
       socket.join(channel_id);
     });
 
+    socket.on("join_server", (server_id) => {
+      const normalizedServerId = String(server_id || "");
+      if (!normalizedServerId || normalizedServerId === "@me") {
+        return;
+      }
+
+      if (
+        socket.data.server_id &&
+        socket.data.server_id !== normalizedServerId
+      ) {
+        socket.leave(`server:${socket.data.server_id}`);
+      }
+
+      socket.data.server_id = normalizedServerId;
+      socket.join(`server:${normalizedServerId}`);
+    });
+
     socket.on(
       "send_message",
       (channel_id, message, timestamp, sender_name, sender_tag, sender_pic) => {

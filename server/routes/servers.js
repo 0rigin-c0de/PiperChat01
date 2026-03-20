@@ -11,6 +11,7 @@ import {
   checkServerInUser,
   createServerFromTemplate,
 } from "../services/serverService.js";
+import { getIO } from "../socket/runtime.js";
 
 const router = express.Router();
 
@@ -43,6 +44,12 @@ router.post("/create_server", async (req, res) => {
   );
 
   if (addServer) {
+    const io = getIO();
+    if (io) {
+      io.to(String(user_id.id)).emit("user_servers_updated", {
+        user_id: String(user_id.id),
+      });
+    }
     res.json({ status: 200, message: "Server Created" });
   } else {
     res.json({ status: 500, message: "Somethig Went Wrong" });
@@ -90,7 +97,16 @@ router.post("/add_new_channel", async (req, res) => {
       },
       newChannel
     );
-    if (data && data.modifiedCount > 0) return res.json({ status: 200 });
+    if (data && data.modifiedCount > 0) {
+      const io = getIO();
+      if (io) {
+        io.to(`server:${String(server_id)}`).emit("server_updated", {
+          server_id: String(server_id),
+          reason: "channel_created",
+        });
+      }
+      return res.json({ status: 200 });
+    }
     return res.status(500).json({ status: 500, message: "Update failed" });
   } catch (err) {
     return res.status(500).json({ status: 500, message: "Server error" });
@@ -107,7 +123,16 @@ router.post("/add_new_category", async (req, res) => {
       { _id: new mongoose.Types.ObjectId(server_id) },
       newCategory
     );
-    if (data && data.modifiedCount > 0) return res.json({ status: 200 });
+    if (data && data.modifiedCount > 0) {
+      const io = getIO();
+      if (io) {
+        io.to(`server:${String(server_id)}`).emit("server_updated", {
+          server_id: String(server_id),
+          reason: "category_created",
+        });
+      }
+      return res.json({ status: 200 });
+    }
     return res.status(500).json({ status: 500, message: "Update failed" });
   } catch (err) {
     return res.status(500).json({ status: 500, message: "Server error" });
@@ -150,7 +175,20 @@ router.post("/leave_server", async (req, res) => {
     await User.updateOne({ _id: user_id.id }, leaveServer);
     const deleteUserFromServer = { $pull: { users: { user_id: user_id.id } } };
     const data2 = await Server.updateOne({ _id: server_id }, deleteUserFromServer);
-    if (data2 && data2.modifiedCount > 0) return res.json({ status: 200 });
+    if (data2 && data2.modifiedCount > 0) {
+      const io = getIO();
+      if (io) {
+        io.to(String(user_id.id)).emit("user_servers_updated", {
+          user_id: String(user_id.id),
+        });
+        io.to(`server:${String(server_id)}`).emit("server_updated", {
+          server_id: String(server_id),
+          reason: "member_left",
+          user_id: String(user_id.id),
+        });
+      }
+      return res.json({ status: 200 });
+    }
     return res.status(500).json({ status: 500, message: "Update failed" });
   } catch (err) {
     return res.status(500).json({ status: 500, message: "Server error" });

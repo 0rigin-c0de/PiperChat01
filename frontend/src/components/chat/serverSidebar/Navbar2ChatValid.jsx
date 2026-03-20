@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { update_options } from "../../../store/optionsSlice";
 import { API_BASE_URL } from "../../../config";
+import socket from "../../socket/Socket";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "../../ui/dialog";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -30,6 +31,7 @@ function Navbar2ChatValid({ onNavigate }) {
 
   const username = useSelector((state) => state.user_info.username);
   const id = useSelector((state) => state.user_info.id);
+  const activeChannelId = useSelector((state) => state.currentPage.page_id);
 
   const front_end_url = process.env.REACT_APP_front_end_url;
 
@@ -139,12 +141,35 @@ function Navbar2ChatValid({ onNavigate }) {
       }),
     });
     const data = await res.json();
-    setserver_details(data[0]);
+    if (!Array.isArray(data) || !data[0]) {
+      dispatch(update_options());
+      Navigate("/channels/@me");
+      return;
+    }
 
-    dispatch(change_page_name(data[0].categories[0].channels[0].channel_name));
-    dispatch(change_page_id(data[0].categories[0].channels[0]._id));
-    dispatch(server_members(data[0].users));
-  }, [dispatch, server_id, url]);
+    const server = data[0];
+    setserver_details(server);
+    dispatch(server_members(server.users || []));
+
+    const channels = (server.categories || []).flatMap((category) =>
+      (category.channels || []).map((channel) => ({
+        id: channel._id,
+        name: channel.channel_name,
+      }))
+    );
+
+    const channelStillExists = activeChannelId
+      ? channels.some((channel) => String(channel.id) === String(activeChannelId))
+      : false;
+
+    if (!channelStillExists) {
+      const nextChannel = channels[0];
+      if (nextChannel?.id) {
+        dispatch(change_page_name(nextChannel.name));
+        dispatch(change_page_id(nextChannel.id));
+      }
+    }
+  }, [Navigate, activeChannelId, dispatch, server_id, url]);
 
   const create_category = async () => {
     const res = await fetch(`${url}/add_new_category`, {
@@ -168,6 +193,27 @@ function Navbar2ChatValid({ onNavigate }) {
   useEffect(() => {
     server_info();
   }, [new_req, server_info]);
+
+  useEffect(() => {
+    if (!server_id || server_id === "@me") {
+      return;
+    }
+    socket.emit("join_server", server_id);
+  }, [server_id]);
+
+  useEffect(() => {
+    const handleServerUpdated = ({ server_id: updatedServerId }) => {
+      if (String(updatedServerId) !== String(server_id)) {
+        return;
+      }
+      server_info();
+    };
+
+    socket.on("server_updated", handleServerUpdated);
+    return () => {
+      socket.off("server_updated", handleServerUpdated);
+    };
+  }, [server_id, server_info]);
 
   return (
     <>

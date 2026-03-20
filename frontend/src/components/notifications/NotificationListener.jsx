@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import socket from "../socket/Socket";
+import { update_options } from "../../store/optionsSlice";
 import {
   clear_channel_unread,
   clear_dm_unread,
@@ -43,6 +44,15 @@ function NotificationListener() {
     socket.on("presence_updated", handlePresenceUpdated);
     socket.emit("get_userid", userId);
 
+    const handleUserServersUpdated = ({ user_id }) => {
+      if (String(user_id) !== String(userId)) {
+        return;
+      }
+      dispatch(update_options());
+    };
+
+    socket.on("user_servers_updated", handleUserServersUpdated);
+
     const fetchUnreadSummary = async () => {
       const res = await fetch(`${url}/unread_summary`, {
         method: "GET",
@@ -62,6 +72,7 @@ function NotificationListener() {
     return () => {
       socket.off("presence_snapshot", handlePresenceSnapshot);
       socket.off("presence_updated", handlePresenceUpdated);
+      socket.off("user_servers_updated", handleUserServersUpdated);
     };
   }, [userId, url, dispatch]);
 
