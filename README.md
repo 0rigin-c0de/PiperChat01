@@ -8,6 +8,10 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/jZi9OCY6gsk">Watch the demo video</a>
+</p>
+
+<p align="center">
   <img alt="Vite" src="https://img.shields.io/badge/Vite-React-646CFF?logo=vite&logoColor=white">
   <img alt="Tailwind" src="https://img.shields.io/badge/TailwindCSS-v4-06B6D4?logo=tailwindcss&logoColor=white">
   <img alt="Node" src="https://img.shields.io/badge/Node.js-ESM-339933?logo=node.js&logoColor=white">
