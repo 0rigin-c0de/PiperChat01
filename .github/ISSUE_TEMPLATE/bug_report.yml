@@ -1,0 +1,129 @@
+name: Bug report
+description: Report a problem in the frontend, backend, auth flow, or realtime chat behavior.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for defects in PiperChat's Vite/React frontend, Express/MongoDB backend, Socket.IO updates, or setup flow.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where does the bug appear?
+      options:
+        - Frontend UI
+        - Authentication
+        - Servers and channels
+        - Direct messages
+        - Notifications and unread counts
+        - Realtime / Socket.IO
+        - Backend API
+        - Database / persistence
+        - Setup / environment
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug in 1-3 sentences.
+      placeholder: Opening a channel shows an empty message list until the page is refreshed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide exact steps so someone else can reproduce it locally.
+      placeholder: |
+        1. Start server and frontend
+        2. Sign in with an existing account
+        3. Open a server channel
+        4. Send a message from another browser
+        5. Notice the unread badge does not update
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: The unread badge should increment immediately for other users in the server.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: The unread badge stays unchanged until a full reload.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: app_part
+    attributes:
+      label: App surface
+      description: Which user flow is affected?
+      options:
+        - Login
+        - Registration / OTP verification
+        - Dashboard
+        - Server chat
+        - Server invite
+        - Direct messages
+        - Profile settings / avatar upload
+        - Route protection
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Local environment
+      description: Include whatever is relevant for reproduction.
+      placeholder: |
+        Frontend URL: http://localhost:5173
+        Backend URL: http://localhost:2000
+        Browser: Chrome 136
+        Database: MongoDB Atlas
+        Redis: disabled
+        Supabase uploads: enabled
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console, network, or server logs
+      description: Paste any useful browser console, network response, or backend log output.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Drag and drop images if the bug is visual.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked for an existing issue that already describes this bug.
+          required: true
+        - label: I included enough detail for someone else to reproduce the issue.
+          required: true
+

@@ -1,0 +1,89 @@
+name: Feature request
+description: Suggest an improvement to PiperChat's product, UX, or developer experience.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for product improvements, UX changes, performance work, or developer-experience enhancements.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the project should change?
+      options:
+        - Frontend UI / UX
+        - Authentication / onboarding
+        - Servers and channels
+        - Direct messages
+        - Notifications and unread counts
+        - Realtime / Socket.IO
+        - Backend API
+        - Performance
+        - Tooling / contributor experience
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What is missing, painful, confusing, or limited today?
+      placeholder: New contributors have no CONTRIBUTING guide, and setup expectations are scattered.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the change you want and how it should work.
+      placeholder: Add a CONTRIBUTING.md with setup, environment variables, run commands, and lint/build steps for frontend and server.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Who benefits and how?
+      description: Explain the user or maintainer impact.
+      placeholder: First-time contributors can get the project running without reading source files to infer scripts and env values.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope or acceptance criteria
+      description: List the minimum outcome that would make this issue complete.
+      placeholder: |
+        - README matches actual scripts
+        - CONTRIBUTING.md added
+        - Docs mention frontend and backend env files
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Related files, routes, or references
+      description: Link files or point to relevant screens/endpoints if you know them.
+      placeholder: |
+        frontend/src/App.jsx
+        server/index.js
+        README.md
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked for an existing issue that already covers this request.
+          required: true
+

@@ -1,0 +1,60 @@
+name: Documentation improvement
+description: Report missing, incorrect, or confusing documentation for setup or development.
+title: "[Docs]: "
+labels:
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for README, setup instructions, environment variable docs, contributor docs, or API/developer guidance gaps.
+
+  - type: dropdown
+    id: doc_area
+    attributes:
+      label: Documentation area
+      options:
+        - README
+        - Environment setup
+        - Frontend development
+        - Backend development
+        - Deployment / health checks
+        - Contribution workflow
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is wrong or missing?
+      placeholder: README says `npm start` runs the server with nodemon, but the package script currently uses `node index.js`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: Suggested improvement
+      placeholder: Update the scripts section and add a short CONTRIBUTING guide with local setup and verification commands.
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_files
+    attributes:
+      label: Affected files or sections
+      placeholder: |
+        README.md
+        server/package.json
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I confirmed this is a docs issue rather than a product bug.
+          required: true
+
