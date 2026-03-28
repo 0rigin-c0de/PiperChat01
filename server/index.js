@@ -23,7 +23,9 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res
+    .status(200)
+    .json({ success: true, message: "Server is up and running!", status: "ok" });
 });
 
 app.use("/", authRoutes);
@@ -42,8 +44,10 @@ async function start() {
     console.log("Connected to DB");
   });
 
-  const allowedOrigins = (process.env.FRONTEND_ORIGINS ||
-    "http://localhost:3000,http://localhost:5173")
+  const allowedOrigins = (
+    process.env.FRONTEND_ORIGINS ||
+    "http://localhost:3000,http://localhost:5173"
+  )
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
