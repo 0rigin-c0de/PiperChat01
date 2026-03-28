@@ -3,7 +3,6 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
 
-
 function Label({ children }) {
   return (
     <label
@@ -112,8 +111,9 @@ function Login() {
   const url = process.env.REACT_APP_URL;
 
   const canSubmit = useMemo(
-    () => user_values.email.trim().length > 0 && user_values.password.length > 0,
-    [user_values.email, user_values.password]
+    () =>
+      user_values.email.trim().length > 0 && user_values.password.length > 0,
+    [user_values.email, user_values.password],
   );
 
   const handle_user_values = (e) => {
@@ -124,7 +124,7 @@ function Login() {
     e.preventDefault();
     const { email, password } = user_values;
     if (!url) {
-      setalert_message("Missing REACT_APP_URL. Check client/.env.");
+      setalert_message("Missing REACT_APP_URL. Check frontend/.env.");
       setalert_box(true);
       return;
     }
@@ -170,7 +170,6 @@ function Login() {
         className="space-y-6"
       >
         <div className="flex flex-col items-center gap-3 text-center">
-          
           <div>
             <h1
               className="text-2xl font-black tracking-tight"
@@ -178,14 +177,20 @@ function Login() {
             >
               Welcome back
             </h1>
-            <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p
+              className="text-sm mt-1"
+              style={{ color: "rgba(255,255,255,0.4)" }}
+            >
               Sign in to continue to PiperChat
             </p>
           </div>
         </div>
 
         {alert_box && (
-          <AlertBanner message={alert_message} onClose={() => setalert_box(false)} />
+          <AlertBanner
+            message={alert_message}
+            onClose={() => setalert_box(false)}
+          />
         )}
 
         <form onSubmit={login_req} className="space-y-4" noValidate>
@@ -223,9 +228,24 @@ function Login() {
             <PrimaryButton type="submit" disabled={!canSubmit || submitting}>
               {submitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
                   </svg>
                   Signing in…
                 </span>
@@ -237,14 +257,23 @@ function Login() {
         </form>
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.07)" }} />
+          <div
+            className="h-px flex-1"
+            style={{ background: "rgba(255,255,255,0.07)" }}
+          />
           <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
             or
           </span>
-          <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.07)" }} />
+          <div
+            className="h-px flex-1"
+            style={{ background: "rgba(255,255,255,0.07)" }}
+          />
         </div>
 
-        <p className="text-center text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <p
+          className="text-center text-sm"
+          style={{ color: "rgba(255,255,255,0.4)" }}
+        >
           New to PiperChat?{" "}
           <RouterLink
             to="/register"

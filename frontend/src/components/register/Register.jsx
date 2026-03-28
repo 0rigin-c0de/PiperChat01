@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 
-
 function Label({ children }) {
   return (
     <label
@@ -190,8 +189,18 @@ function Register() {
   const [verifying, setVerifying] = useState(false);
 
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
   const url = process.env.REACT_APP_URL;
 
@@ -203,7 +212,7 @@ function Register() {
       user_values.date_value !== "" &&
       user_values.month_value !== "" &&
       user_values.year_value !== "",
-    [user_values]
+    [user_values],
   );
 
   const handle_user_values = (e) => {
@@ -229,7 +238,7 @@ function Register() {
     let day = d.getDate();
 
     if (!url) {
-      setalert_message("Missing REACT_APP_URL. Check client/.env.");
+      setalert_message("Missing REACT_APP_URL. Check frontend/.env.");
       setalert_box(true);
       return;
     }
@@ -250,7 +259,9 @@ function Register() {
         const data = await res.json();
         if (data.status === 201) {
           if (data.email_sent === false) {
-            setalert_message("We couldn't send the verification email. Click Resend.");
+            setalert_message(
+              "We couldn't send the verification email. Click Resend.",
+            );
             setalert_box(true);
           }
           setModalShow(true);
@@ -285,7 +296,10 @@ function Register() {
       const res = await fetch(`${url}/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp_value: otp_value.trim(), email: user_values.email }),
+        body: JSON.stringify({
+          otp_value: otp_value.trim(),
+          email: user_values.email,
+        }),
       });
       const data = await res.json();
       if (data.status === 201) {
@@ -296,7 +310,9 @@ function Register() {
         setalert_message("Incorrect code. Please try again.");
         setalert_box(true);
       } else if (data.status === 442) {
-        setalert_message("Code expired. A new one has been sent to your email.");
+        setalert_message(
+          "Code expired. A new one has been sent to your email.",
+        );
         setalert_box(true);
       } else {
         setalert_message("Verification failed. Please try again.");
@@ -324,7 +340,7 @@ function Register() {
         setalert_message(
           data.email_sent === false
             ? "Couldn't send email. Please try again."
-            : "New code sent! Check your inbox."
+            : "New code sent! Check your inbox.",
         );
       } else {
         setalert_message("Could not resend code. Please try again.");
@@ -357,7 +373,10 @@ function Register() {
               >
                 Create your account
               </h1>
-              <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <p
+                className="text-sm mt-1"
+                style={{ color: "rgba(255,255,255,0.4)" }}
+              >
                 Join PiperChat in under a minute
               </p>
             </div>
@@ -365,7 +384,10 @@ function Register() {
 
           {/* Alert */}
           {alert_box && (
-            <AlertBanner message={alert_message} onClose={() => setalert_box(false)} />
+            <AlertBanner
+              message={alert_message}
+              onClose={() => setalert_box(false)}
+            />
           )}
 
           {/* Form */}
@@ -408,7 +430,10 @@ function Register() {
                 disabled={submitting || verifying}
                 placeholder="At least 7 characters"
               />
-              <p className="mt-1.5 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <p
+                className="mt-1.5 text-xs"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
                 Minimum 7 characters.
               </p>
             </div>
@@ -430,9 +455,15 @@ function Register() {
                   disabled={submitting || verifying}
                   required
                 >
-                  <option value="" disabled>Day</option>
+                  <option value="" disabled>
+                    Day
+                  </option>
                   {days.map((d) => (
-                    <option key={`day-${d}`} value={d} style={{ background: "#1a1a2e", color: "#f0f0f5" }}>
+                    <option
+                      key={`day-${d}`}
+                      value={d}
+                      style={{ background: "#1a1a2e", color: "#f0f0f5" }}
+                    >
                       {d}
                     </option>
                   ))}
@@ -445,9 +476,15 @@ function Register() {
                   disabled={submitting || verifying}
                   required
                 >
-                  <option value="" disabled>Month</option>
+                  <option value="" disabled>
+                    Month
+                  </option>
                   {months.map((m, idx) => (
-                    <option key={`month-${idx + 1}`} value={idx + 1} style={{ background: "#1a1a2e", color: "#f0f0f5" }}>
+                    <option
+                      key={`month-${idx + 1}`}
+                      value={idx + 1}
+                      style={{ background: "#1a1a2e", color: "#f0f0f5" }}
+                    >
                       {m}
                     </option>
                   ))}
@@ -460,9 +497,15 @@ function Register() {
                   disabled={submitting || verifying}
                   required
                 >
-                  <option value="" disabled>Year</option>
+                  <option value="" disabled>
+                    Year
+                  </option>
                   {year.map((y) => (
-                    <option key={`year-${y}`} value={y} style={{ background: "#1a1a2e", color: "#f0f0f5" }}>
+                    <option
+                      key={`year-${y}`}
+                      value={y}
+                      style={{ background: "#1a1a2e", color: "#f0f0f5" }}
+                    >
                       {y}
                     </option>
                   ))}
@@ -492,9 +535,24 @@ function Register() {
               >
                 {submitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
                     </svg>
                     Creating account…
                   </span>
@@ -505,7 +563,10 @@ function Register() {
             </div>
           </form>
 
-          <p className="text-center text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <p
+            className="text-center text-sm"
+            style={{ color: "rgba(255,255,255,0.4)" }}
+          >
             Already have an account?{" "}
             <RouterLink
               to="/"
@@ -534,7 +595,8 @@ function Register() {
             background: "#111118",
             border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: "24px",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(168,85,247,0.15)",
+            boxShadow:
+              "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(168,85,247,0.15)",
           }}
         >
           {/* Icon */}
@@ -561,7 +623,10 @@ function Register() {
             style={{ color: "rgba(255,255,255,0.45)" }}
           >
             We sent a verification code to{" "}
-            <span className="font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+            <span
+              className="font-semibold"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+            >
               {user_values.email}
             </span>
           </DialogDescription>
@@ -576,7 +641,11 @@ function Register() {
                 autoFocus
                 disabled={verifying}
                 placeholder="Enter code"
-                style={{ textAlign: "center", letterSpacing: "0.3em", fontSize: "1.1rem" }}
+                style={{
+                  textAlign: "center",
+                  letterSpacing: "0.3em",
+                  fontSize: "1.1rem",
+                }}
               />
             </div>
 
@@ -608,9 +677,24 @@ function Register() {
               >
                 {verifying ? (
                   <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
                     </svg>
                     Verifying…
                   </span>
