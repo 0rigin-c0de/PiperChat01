@@ -229,7 +229,7 @@ function Register() {
     let day = d.getDate();
 
     if (!url) {
-      setalert_message("Missing REACT_APP_URL. Check client/.env.");
+      setalert_message("Missing REACT_APP_URL. Check frontend/.env.");
       setalert_box(true);
       return;
     }

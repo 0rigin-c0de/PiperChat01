@@ -124,7 +124,7 @@ function Login() {
     e.preventDefault();
     const { email, password } = user_values;
     if (!url) {
-      setalert_message("Missing REACT_APP_URL. Check client/.env.");
+      setalert_message("Missing REACT_APP_URL. Check frontend/.env.");
       setalert_box(true);
       return;
     }
