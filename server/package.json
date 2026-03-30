@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-  "start": "node index.js",
-  "dev": "nodemon index.js"
-},
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
   "author": "shunnu",
   "license": "ISC",
   "dependencies": {
@@ -19,7 +19,6 @@
     "nanoid": "^5.1.6",
     "nodemailer": "^8.0.3",
     "nodemon": "^3.1.14",
-    "react-scripts": "^0.0.0",
     "redis": "^5.11.0",
     "shortid": "^2.2.16",
     "socket.io": "^4.5.4"
