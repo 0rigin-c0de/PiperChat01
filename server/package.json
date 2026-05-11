@@ -6,7 +6,17 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/",
+    "devDependencies": {
+    	"@jest/globals": "^29.0.0",
+    	"jest": "^29.0.0",
+    	"supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {}
+  }
   },
   "author": "shunnu",
   "license": "ISC",
@@ -22,5 +32,10 @@
     "redis": "^5.11.0",
     "shortid": "^2.2.16",
     "socket.io": "^4.5.4"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.4.1",
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }
