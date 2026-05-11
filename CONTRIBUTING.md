@@ -98,6 +98,25 @@ Useful checks:
 - Profile: update display name or avatar if that area changed.
 - Docs: make sure commands, paths, ports, and environment variable names are correct.
 
+## Automated Checks
+
+GitHub Actions runs checks automatically when someone opens or updates a pull request.
+
+The main CI workflow checks:
+
+- Frontend dependencies install correctly.
+- Frontend lint passes.
+- Frontend build passes.
+- Backend dependencies install correctly.
+
+The Vouch workflows help with contributor trust:
+
+- Comment `vouch @username` on an issue or PR to add someone to `.github/VOUCHED.td`.
+- Comment `denounce @username` to add someone to `.github/DENOUNCED.td`.
+- New and updated PRs are checked against the Vouch lists.
+
+If a check fails, open the failed GitHub Actions job, read the error, fix it locally, and push another commit. GitHub will run the checks again automatically.
+
 ## Code Style
 
 Follow the style already used in the codebase.
