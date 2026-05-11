@@ -1,0 +1,125 @@
+# Contributing to PiperChat
+
+Thanks for helping improve PiperChat. This project has a Vite/React frontend and an Express/MongoDB/Socket.IO backend. Keep changes focused, clear, and easy to review.
+
+## Pull Request Format
+
+Open focused pull requests. A PR should solve one bug, add one feature, or improve one area of documentation.
+
+Use this structure in the PR description:
+
+```md
+## Summary
+- What changed?
+- Why is this needed?
+
+## Related Issue
+Closes #123
+
+## Type of Change
+- [ ] Bug fix
+- [ ] Feature
+- [ ] Documentation
+- [ ] Refactor
+- [ ] Tooling / developer experience
+
+## Validation
+- [ ] `cd frontend && npm run lint`
+- [ ] `cd frontend && npm run build`
+- [ ] Server starts with `cd server && npm start`, if backend code changed
+- [ ] I checked the feature or page I changed in the app
+
+## Screenshots or Recording
+Add before/after images for visible UI changes.
+
+## Notes for Reviewers
+Mention anything reviewers should know.
+```
+
+PR descriptions should explain what changed and why. For UI changes, add screenshots. For bug fixes, include the steps you used to check the fix.
+
+## Commit Message Conventions
+
+Use this commit style:
+
+```text
+type(scope): short imperative summary
+```
+
+Good examples:
+
+```text
+feat(chat): add unread count sync
+fix(auth): handle expired OTP verification
+docs: add setup notes for environment variables
+refactor(server): simplify invite lookup
+chore(frontend): update lint configuration
+```
+
+Preferred types are:
+
+- `feat` for user-facing features
+- `fix` for defects
+- `docs` for documentation-only changes
+- `refactor` for behavior-preserving code changes
+- `test` for test-only changes
+- `chore` for maintenance, dependencies, and tooling
+
+Keep commit messages short and specific. Avoid vague messages like `updates`, `changes`, or `fix stuff`.
+
+## Test Expectations
+
+Before requesting review, run the checks that apply to your change.
+
+For frontend changes:
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+For backend changes:
+
+```bash
+cd server
+npm start
+```
+
+After starting the app, manually try the thing you changed. For example, if you changed login, try logging in. If you changed chat, send a message and check that it appears.
+
+There is currently no dedicated automated test script in `frontend/package.json` or `server/package.json`. Until one is added, write a short note in the PR explaining what you checked manually.
+
+Useful checks:
+
+- Auth: sign up, verify OTP, sign in, and sign out.
+- Chat: send a message, switch channels, and check direct messages.
+- Servers and invites: create a server, join with an invite, and try an invalid invite.
+- Profile: update display name or avatar if that area changed.
+- Docs: make sure commands, paths, ports, and environment variable names are correct.
+
+## Code Style
+
+Follow the style already used in the codebase.
+
+- Use JavaScript ES modules.
+- Keep React components in PascalCase.
+- Keep variables and functions in camelCase.
+- Keep imports tidy.
+- Reuse the existing Redux, React Router, Socket.IO, and service patterns.
+- Use Tailwind classes where nearby code does.
+- Keep API responses consistent with the current format.
+- Do not commit secrets, `.env` files, `node_modules`, or build output.
+
+Run ESLint for frontend code before review:
+
+```bash
+cd frontend
+npm run lint
+```
+
+## Review Timeline
+
+Maintainers usually try to give an initial response within 2 to 3 business days. Small bug fixes and docs changes may be reviewed faster. Larger frontend, backend, auth, or realtime changes may take longer.
+
+To keep review moving, respond to requested changes when you can. Clear notes, screenshots, and a focused PR make review much easier.
