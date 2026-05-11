@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Hash, Pencil, Trash2, Save, SendHorizontal } from "lucide-react";
+import { Hash, Pencil, Trash2, Save, SendHorizontal, Loader2, AlertCircle } from "lucide-react";
 import socket from "../../socket/Socket";
 import { useParams } from "react-router-dom";
 import { clear_channel_unread } from "../../../store/unreadSlice";
@@ -23,9 +23,11 @@ function ValidChat() {
   const id = useSelector((state) => state.user_info.id);
 
   const [chat_message, setchat_message] = useState("");
-  const [all_messages, setall_messages] = useState(null);
+  const [all_messages, setall_messages] = useState([]);
   const [editingTimestamp, setEditingTimestamp] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     socket.emit("join_chat", channel_id);
@@ -66,6 +68,10 @@ function ValidChat() {
 
   useEffect(() => {
     if (channel_id !== "") {
+      setall_messages([]);
+      setIsLoading(true);
+      setError(null);
+
       dispatch(clear_channel_unread({ server_id, channel_id }));
       fetch(`${url}/mark_channel_read`, {
         method: "POST",
@@ -75,27 +81,37 @@ function ValidChat() {
         },
         body: JSON.stringify({ server_id, channel_id }),
       });
-      setall_messages(null);
       get_messages();
     }
     // eslint-disable-next-line
   }, [channel_id]);
 
   const get_messages = async () => {
-    const res = await fetch(`${url}/get_messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": localStorage.getItem("token"),
-      },
-      body: JSON.stringify({
-        channel_id,
-        server_id,
-      }),
-    });
-    const data = await res.json();
-    if (data.chats.length !== 0) {
-      setall_messages(data.chats);
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await fetch(`${url}/get_messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": localStorage.getItem("token"),
+        },
+        body: JSON.stringify({
+          channel_id,
+          server_id,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to load messages");
+      }
+
+      const data = await res.json();
+      setall_messages(data.chats ? data.chats : []);
+    } catch (err) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -207,8 +223,22 @@ function ValidChat() {
   return (
     <div className="flex h-full min-w-0 flex-col">
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-soft backdrop-blur-xl">
-          <div className="flex items-center gap-3">
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-300" />
+          </div>
+        ) : error ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <AlertCircle className="h-10 w-10 text-red-400" />
+            <div className="text-white/80">{error}</div>
+            <Button variant="outline" onClick={get_messages}>
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-soft backdrop-blur-xl">
+              <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/5">
               <Hash className="h-5 w-5 text-brand-300" />
             </div>
@@ -312,6 +342,8 @@ function ValidChat() {
             );
           })}
         </div>
+        </>
+        )}
       </div>
 
       <div className="border-t border-white/10 bg-black/25 p-3">
