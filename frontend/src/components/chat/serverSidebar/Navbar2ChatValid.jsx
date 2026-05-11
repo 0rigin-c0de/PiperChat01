@@ -33,7 +33,7 @@ function Navbar2ChatValid({ onNavigate }) {
   const id = useSelector((state) => state.user_info.id);
   const activeChannelId = useSelector((state) => state.currentPage.page_id);
 
-  const front_end_url = process.env.REACT_APP_front_end_url;
+  const front_end_url = import.meta.env.VITE_FRONT_END_URL;
 
   const [show, setShow] = useState(false);
   const handleClose = () => {
