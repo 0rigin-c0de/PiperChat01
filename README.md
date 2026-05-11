@@ -98,3 +98,36 @@ Server runs on `http://localhost:2000`
 - `npm run dev` → Vite dev server
 - `npm run build` → production build
 - `npm run lint` → ESLint
+
+## CI checks
+
+This repository uses GitHub Actions to run automated checks on every pull
+request and every push to `main`.
+
+The workflow lives at `.github/workflows/ci.yml` and currently runs:
+
+- Frontend dependency install with `npm ci`
+- Frontend linting with `npm run lint`
+- Frontend production build with `npm run build`
+- Backend dependency install with `npm ci`
+
+These checks help contributors catch broken builds, lint errors, and dependency
+issues before maintainers review the pull request.
+
+To run the same checks locally:
+
+```bash
+cd frontend
+npm ci
+npm run lint
+npm run build
+```
+
+```bash
+cd server
+npm ci
+```
+
+Backend tests are not included yet because the backend does not currently have a
+test script. Once backend tests are added, the CI workflow can be extended to run
+`npm test` inside `server/`.
