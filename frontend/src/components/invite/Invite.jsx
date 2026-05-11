@@ -13,7 +13,7 @@ function Invite() {
   const { username, tag, profile_pic, id } = user_creds || {};
 
   const { invite_link } = useParams();
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
   const [invite_details, setinvite_details] = useState(null);
   const [invalid_invite_link, setinvalid_invite_link] = useState(null);
 
