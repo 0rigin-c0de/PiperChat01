@@ -177,6 +177,8 @@ function Register() {
   const [modalShow, setModalShow] = useState(false);
   const [alert_box, setalert_box] = useState(false);
   const [alert_message, setalert_message] = useState("");
+  const [otp_alert_box, setotp_alert_box] = useState(false);
+  const [otp_alert_message, setotp_alert_message] = useState("");
   const [date_validation, setdate_validation] = useState(false);
   const [user_values, setuser_values] = useState({
     date_value: "",
@@ -281,7 +283,7 @@ function Register() {
     if (!url) return;
     try {
       setVerifying(true);
-      setalert_box(false);
+      setotp_alert_box(false);
       const res = await fetch(`${url}/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -291,20 +293,24 @@ function Register() {
       if (data.status === 201) {
         setModalShow(false);
         setotp_value("");
+        setModalShow(false);
+        setotp_value("");
         Navigate("/");
       } else if (data.status === 432) {
-        setalert_message("Incorrect code. Please try again.");
-        setalert_box(true);
+        setotp_alert_message("Incorrect code. Please try again.");
+        setotp_alert_box(true);
       } else if (data.status === 442) {
-        setalert_message("Code expired. A new one has been sent to your email.");
-        setalert_box(true);
+        setotp_alert_message(
+          "Code expired. A new one has been sent to your email."
+        );
+        setotp_alert_box(true);
       } else {
-        setalert_message("Verification failed. Please try again.");
-        setalert_box(true);
+        setotp_alert_message("Verification failed. Please try again.");
+        setotp_alert_box(true);
       }
     } catch {
-      setalert_message("Network error. Please try again.");
-      setalert_box(true);
+      setotp_alert_message("Network error. Please try again.");
+      setotp_alert_box(true);
     } finally {
       setVerifying(false);
     }
@@ -321,18 +327,18 @@ function Register() {
       });
       const data = await res.json();
       if (data.status === 201) {
-        setalert_message(
+        setotp_alert_message(
           data.email_sent === false
             ? "Couldn't send email. Please try again."
             : "New code sent! Check your inbox."
         );
       } else {
-        setalert_message("Could not resend code. Please try again.");
+        setotp_alert_message("Could not resend code. Please try again.");
       }
-      setalert_box(true);
+      setotp_alert_box(true);
     } catch {
-      setalert_message("Network error. Please try again.");
-      setalert_box(true);
+      setotp_alert_message("Network error. Please try again.");
+      setotp_alert_box(true);
     } finally {
       setVerifying(false);
     }
@@ -526,7 +532,11 @@ function Register() {
         onOpenChange={(open) => {
           if (verifying) return;
           setModalShow(open);
-          if (!open) setotp_value("");
+          if (!open) {
+            setotp_value("");
+            setotp_alert_box(false);
+            setotp_alert_message("");
+          }
         }}
       >
         <DialogContent
@@ -565,7 +575,12 @@ function Register() {
               {user_values.email}
             </span>
           </DialogDescription>
-
+          {otp_alert_box && (
+            <AlertBanner
+              message={otp_alert_message}
+              onClose={() => setotp_alert_box(false)}
+            />
+          )}
           <form onSubmit={verify_req} className="mt-5 space-y-4">
             <div>
               <Label>Verification Code</Label>
