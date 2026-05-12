@@ -18,7 +18,15 @@ import { setIO } from "./socket/runtime.js";
 const port = process.env.PORT || 2000;
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (
+  process.env.FRONTEND_ORIGINS ||
+  "http://localhost:3000,http://localhost:5173"
+)
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
@@ -43,14 +51,6 @@ async function start() {
     console.log(`listening on port ${port}`);
     console.log("Connected to DB");
   });
-
-  const allowedOrigins = (
-    process.env.FRONTEND_ORIGINS ||
-    "http://localhost:3000,http://localhost:5173"
-  )
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
 
   const io = new SocketIOServer(server, {
     pingTimeout: 20000,

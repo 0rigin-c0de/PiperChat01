@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import express from "express";
 import jwt from "jsonwebtoken";
 
@@ -38,12 +39,13 @@ router.post("/signup", async (req, res) => {
     const usernameResponse = await isUsernameAvailable(username);
     const finalTag = usernameResponse.final_tag;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       username,
       tag: finalTag,
       profile_pic: process.env.default_profile_pic,
       email,
-      password,
+      password: hashedPassword,
       dob,
       authorized,
       verification: [{ timestamp: Date.now(), code: otp }],
@@ -165,7 +167,7 @@ router.post("/verify", async (req, res) => {
           status: 201,
         });
       }
-      return res.status(432).json({ error: "incorrect passowrd", status: 432 });
+      return res.status(432).json({ error: "incorrect password", status: 432 });
     }
 
     const otp = generateOTP();
@@ -222,7 +224,8 @@ router.post("/signin", async (req, res) => {
         .json({ error: "invalid username or password", status: 442 });
     }
 
-    if (req.body.password !== user.password) {
+    const passwordMatch = await bcrypt.compare(req.body.password, user.password);
+    if (!passwordMatch) {
       return res
         .status(442)
         .json({ error: "invalid username or password", status: 442 });

@@ -6,14 +6,12 @@ export async function addServerToUser(id, serverDetails, serverRole) {
   const { server_name, server_pic, server_id } = serverDetails;
   const update = {
     $push: {
-      servers: [
-        {
-          server_name,
-          server_pic,
-          server_role: serverRole,
-          server_id,
-        },
-      ],
+      servers: {
+        server_name,
+        server_pic,
+        server_role: serverRole,
+        server_id,
+      },
     },
   };
 
@@ -120,15 +118,13 @@ export async function addUserToServer(userDetails, serverId) {
   const { username, tag, id, profile_pic } = userDetails;
   const update = {
     $push: {
-      users: [
-        {
-          user_name: username,
-          user_profile_pic: profile_pic,
-          user_tag: tag,
-          user_role: "member",
-          user_id: id,
-        },
-      ],
+      users: {
+        user_name: username,
+        user_profile_pic: profile_pic,
+        user_tag: tag,
+        user_role: "member",
+        user_id: id,
+      },
     },
   };
 

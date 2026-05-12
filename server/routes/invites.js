@@ -49,13 +49,11 @@ router.post("/create_invite_link", async (req, res) => {
 
     const userInvitesList = {
       $push: {
-        invites: [
-          {
-            server_id,
-            invite_code,
-            timestamp: String(timestamp),
-          },
-        ],
+        invites: {
+          server_id,
+          invite_code,
+          timestamp: String(timestamp),
+        },
       },
     };
     try {
@@ -103,12 +101,11 @@ router.post("/accept_invite", async (req, res) => {
   const server_id = server_details.invite_details.server_id;
 
   const checkUser = await checkServerInUser(id, server_id);
-  if (
-    !checkUser[0] ||
-    !checkUser[0].servers ||
-    checkUser[0].servers.length > 0
-  ) {
-    return res.json({ status: 403 });
+  if (!checkUser[0] || !checkUser[0].servers) {
+    return res.status(500).json({ status: 500, message: "User lookup failed" });
+  }
+  if (checkUser[0].servers.length > 0) {
+    return res.json({ status: 403, message: "Already a member" });
   }
 
   const addUser = await addUserToServer(user_details, server_id);

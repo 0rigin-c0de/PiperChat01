@@ -98,28 +98,24 @@ router.post("/add_friend", async (req, res) => {
 
   const sendingReq = {
     $push: {
-      incoming_reqs: [
-        {
-          id,
-          username,
-          profile_pic,
-          tag,
-          status: "incoming",
-        },
-      ],
+      incoming_reqs: {
+        id,
+        username,
+        profile_pic,
+        tag,
+        status: "incoming",
+      },
     },
   };
   const sendingReq2 = {
     $push: {
-      outgoing_reqs: [
-        {
-          id: friend_id,
-          username: friend_username,
-          profile_pic: friend_profile_pic,
-          tag: friend_tag,
-          status: "outgoing",
-        },
-      ],
+      outgoing_reqs: {
+        id: friend_id,
+        username: friend_username,
+        profile_pic: friend_profile_pic,
+        tag: friend_tag,
+        status: "outgoing",
+      },
     },
   };
 
