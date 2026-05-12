@@ -1,34 +1,115 @@
 <p align="center">
-  <img alt="Piper" src="https://img.shields.io/badge/Piper-7C5CFC?style=for-the-badge">
-  <img alt="Chat" src="https://img.shields.io/badge/Chat-22D3EE?style=for-the-badge">
+  <img width="2172" height="724" alt="ChatGPT Image May 12, 2026, 07_15_49 PM" src="https://github.com/user-attachments/assets/93d60fbb-a14a-408d-bbb7-96ff031e0a1e" />
 </p>
+
+<h1 align="center"> PiperChat</h1>
 
 <p align="center">
-  Discord-style chat app • Vite + Tailwind • Express + MongoDB • Socket.IO
+  <strong>A Discord-style real-time chat app</strong>
+  <br>
+  with DMs, servers/channels, presence, and email OTP auth built with Vite + Tailwind and an Express + MongoDB + Socket.IO backend.
 </p>
-
 <p align="center">
   <a href="https://youtu.be/jZi9OCY6gsk">Watch the demo video</a>
 </p>
 
-<p align="center">
-  <img alt="Vite" src="https://img.shields.io/badge/Vite-React-646CFF?logo=vite&logoColor=white">
-  <img alt="Tailwind" src="https://img.shields.io/badge/TailwindCSS-v4-06B6D4?logo=tailwindcss&logoColor=white">
-  <img alt="Node" src="https://img.shields.io/badge/Node.js-ESM-339933?logo=node.js&logoColor=white">
-  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white">
-  <img alt="Socket.IO" src="https://img.shields.io/badge/Socket.IO--010101?logo=socket.io&logoColor=white">
-</p>
+<a name="readme-top"></a>
 
-## What is this?
+<img src="https://github.com/AnderMendoza/AnderMendoza/raw/main/assets/line-neon.gif" width="100%">
 
-PiperChat is a Discord-style chat app with:
+## 📖 Table of Contents
+* [About the Project](#about)
+* [Key Features](#features)
+* [Visual Showcase](#visual-showcase)
+* [Tech Stack](#tech-stack)
+* [Documentation](#documentation)
+* [Contact](#contacts)
+---
 
-- Direct Messages + Servers/Channels
-- Realtime updates via Socket.IO
-- Presence + unread counts
-- Email OTP verification 
-- Profile updates (display name + avatar) with Supabase storage
-- Optional Redis caching (Upstash supported)
+<a name="about"></a>
+## ✨ About PiperChat
+
+PiperChat is more than just a chat app; it's a full-scale demonstration of modern web capabilities. Designed to mimic the seamless experience of Discord, it bridges the gap between complex backend architecture and a "pixel-perfect" frontend. 
+
+Whether you're managing a community through **Servers and Channels** or having a private conversation via **Direct Messages**, PiperChat ensures sub-millisecond delivery using Socket.IO and optimized MongoDB indexing.
+
+---
+
+<a name="features"></a>
+## 🚀 Key Features
+
+### 💬 Real-Time Messaging
+- **Instant Delivery:** Powered by Socket.IO for a lag-free experience.
+- **Presence Tracking:** See who's online, idle, or offline in real-time.
+- **Unread Indicators:** Never miss a message with smart notification counts.
+
+### 🏠 Architecture & Organization
+- **Servers & Channels:** Structured communication for different topics.
+- **Direct Messaging:** Secure one-on-one private conversations.
+
+### 🔒 Security & User Management
+- **Email OTP Verification:** Robust signup flow ensuring authentic users.
+- **Profile Customization:** Update display names and avatars seamlessly.
+- **Cloud Storage:** High-speed image hosting via Supabase storage buckets.
+
+### ⚡ Performance Optimization
+- **Redis Caching:** Optional Upstash integration for ultra-fast data retrieval.
+- **Tailwind v4:** Utilizing the latest CSS engine for high-performance, small-bundle styling.
+
+<a name="visual-showcase"></a>
+## 📸 Visual Showcase
+
+### 🔐 Secure Authentication
+> *A smooth login experience featuring secure Email OTP verification.*
+> <img width="894" height="540" alt="image" src="https://github.com/user-attachments/assets/5d498a0e-602c-4cf0-a73e-7f181488209a" />
+> <img width="606" height="485" alt="image" src="https://github.com/user-attachments/assets/0e090aca-3aa5-4cfd-a378-a982e6a7d27e" />
+
+
+### 📝 Seamless Account Creation
+> *The onboarding flow featuring user registration and the Email OTP verification system to ensure secure access.*
+
+<!-- ADD YOUR SIGNUP/ACCOUNT CREATION SCREENSHOT BELOW -->
+> <img width="638" height="501" alt="image" src="https://github.com/user-attachments/assets/3e7d3c17-83b1-419f-985f-df3a503071a7" />
+
+### 🖥️ Dashboard UI
+> *The main interface featuring the server list, channel navigation, and the primary chat window.*
+
+<!-- ADD YOUR DASHBOARD SCREENSHOT BELOW -->
+<img width="1086" height="640" alt="image" src="https://github.com/user-attachments/assets/3401c1c9-d9cd-4edd-9ef7-1f3cf4ac1d66" />
+
+
+<a name="tech-stack"></a>
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React, Vite, Tailwind CSS v4 |
+| **Backend** | Node.js (ESM), Express.js |
+| **Real-time** | Socket.IO |
+| **Database** | MongoDB (Atlas) |
+| **Storage** | Supabase |
+| **Caching** | Redis (Upstash) |
+
+---
+
+<a name="how-to-use"></a>
+## 🛠️ How to Use
+
+### 1. Prerequisites
+- Node.js (v18+)
+- MongoDB Atlas Account
+- Supabase Project (for avatars)
+
+### 2. Installation
+```bash
+# Clone the repository
+git clone [https://github.com/YourUsername/PiperChat.git](https://github.com/YourUsername/PiperChat.git)
+
+# Install Server dependencies
+cd server && npm install
+
+# Install Frontend dependencies
+cd ../frontend && npm install
 
 ## Project structure
 
@@ -131,3 +212,39 @@ npm ci
 Backend tests are not included yet because the backend does not currently have a
 test script. Once backend tests are added, the CI workflow can be extended to run
 `npm test` inside `server/`.
+
+
+<img src="https://github.com/AnderMendoza/AnderMendoza/raw/main/assets/line-neon.gif" width="100%">
+
+<a name="documentation"></a>
+## 📄 Documentation
+
+For a detailed breakdown of the API endpoints and component structure, please refer to our [Wiki](https://github.com/0rigin-c0de/PiperChat01/wiki) (Coming Soon).
+
+### 🛠️ CI/CD Workflow
+We use **GitHub Actions** to maintain code quality. Every pull request is automatically checked for:
+*   **Successful Builds:** Verified for both Frontend & Backend.
+*   **Linting Standards:** Automated checking via ESLint.
+*   **Dependency Integrity:** Ensures all packages are secure and functional.
+
+---
+
+<a name="contacts"></a>
+## 🤝 Contacts
+
+| Source | Link |
+| :--- | :--- |
+| **GitHub Profile** | [0rigin-c0de](https://github.com/0rigin-c0de) |
+| **Project Repository** | [PiperChat01](https://github.com/0rigin-c0de/PiperChat01) |
+
+---
+
+<p align="right">
+  <a href="#readme-top">⬆️ Back to Top</a>
+</p>
+
+<p align="center">
+  <b>Don't forget to ⭐ star the repo if you like this project!</b>
+  <br>
+  Made with ❤️ for the 🌍
+</p>
