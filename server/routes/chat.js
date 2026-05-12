@@ -69,15 +69,13 @@ router.post("/store_message", async (req, res) => {
   if (!response || response.length === 0) {
     const pushNewChannel = {
       $push: {
-        channels: [
-          {
-            channel_id,
-            channel_name,
-            chat_details: [
-              chatMessage,
-            ],
-          },
-        ],
+        channels: {
+          channel_id,
+          channel_name,
+          chat_details: [
+            chatMessage,
+          ],
+        },
       },
     };
     try {
@@ -98,9 +96,7 @@ router.post("/store_message", async (req, res) => {
   } else {
     const pushNewChat = {
       $push: {
-        "channels.$.chat_details": [
-          chatMessage,
-        ],
+        "channels.$.chat_details": chatMessage,
       },
     };
     try {

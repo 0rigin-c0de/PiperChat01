@@ -92,7 +92,7 @@ function DirectMessage() {
       setMessages((currentMessages) =>
         currentMessages.map((entry) =>
           String(entry.timestamp) === String(message.timestamp) &&
-          entry.sender_id === message.friend_id
+          entry.sender_id === message.sender_id
             ? { ...entry, content: message.content }
             : entry
         )
@@ -109,7 +109,7 @@ function DirectMessage() {
           (entry) =>
             !(
               String(entry.timestamp) === String(message.timestamp) &&
-              entry.sender_id === message.friend_id
+              entry.sender_id === message.sender_id
             )
         )
       );

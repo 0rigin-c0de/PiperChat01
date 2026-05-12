@@ -53,9 +53,6 @@ function attachSocketHandlers(io) {
     socket.on("channelCreated", (data) => {
       io.emit("newChannel", data);
     });
-  });
-
-  io.on("connection", (socket) => {
     socket.on("get_userid", (user_id) => {
       const normalizedUserId = String(user_id);
 

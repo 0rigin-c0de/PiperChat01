@@ -19,26 +19,22 @@ export async function addFriend(userData, friendData) {
 
   const userFriendsList = {
     $push: {
-      friends: [
-        {
-          id: String(friend_id),
-          username: friend_username,
-          profile_pic: friend_profile_pic,
-          tag: friend_tag,
-        },
-      ],
+      friends: {
+        id: String(friend_id),
+        username: friend_username,
+        profile_pic: friend_profile_pic,
+        tag: friend_tag,
+      },
     },
   };
   const friendFriendsList = {
     $push: {
-      friends: [
-        {
-          id: String(id),
-          username,
-          profile_pic,
-          tag,
-        },
-      ],
+      friends: {
+        id: String(id),
+        username,
+        profile_pic,
+        tag,
+      },
     },
   };
 
