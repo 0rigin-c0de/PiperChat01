@@ -158,9 +158,7 @@ router.patch("/profile", authToken, async (req, res) => {
     const token = jwt.sign(
       {
         id: String(updated._id),
-        username: updated.username,
-        tag: updated.tag,
-        profile_pic: updated.profile_pic,
+        email: updated.email,
       },
       process.env.ACCESS_TOKEN
     );

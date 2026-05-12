@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 import { OTP_TTL_MS } from "../config/constants.js";
 import { authToken } from "../middleware/auth.js";
@@ -21,6 +22,8 @@ router.post("/signup", async (req, res) => {
   const { email, username, password, dob } = req.body;
   const authorized = false;
 
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   const response = await signup(email, username, password, dob);
 
   if (
@@ -38,12 +41,13 @@ router.post("/signup", async (req, res) => {
     const usernameResponse = await isUsernameAvailable(username);
     const finalTag = usernameResponse.final_tag;
 
+
     const newUser = new User({
       username,
       tag: finalTag,
       profile_pic: process.env.default_profile_pic,
       email,
-      password,
+      password: hashedPassword,
       dob,
       authorized,
       verification: [{ timestamp: Date.now(), code: otp }],
@@ -72,7 +76,7 @@ router.post("/signup", async (req, res) => {
         username,
         tag,
         email,
-        password,
+        password: hashedPassword,
         dob,
         authorized,
       },
@@ -104,7 +108,7 @@ router.post("/signup", async (req, res) => {
           username,
           tag,
           email,
-          password,
+          password: hashedPassword,
           dob,
           authorized,
         },
@@ -117,7 +121,7 @@ router.post("/signup", async (req, res) => {
           username,
           email,
           tag,
-          password,
+          password: hashedPassword,
           dob,
           authorized,
           verification: [
@@ -222,7 +226,12 @@ router.post("/signin", async (req, res) => {
         .json({ error: "invalid username or password", status: 442 });
     }
 
-    if (req.body.password !== user.password) {
+    const validPassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+
+    if (!validPassword) {
       return res
         .status(442)
         .json({ error: "invalid username or password", status: 442 });
@@ -237,9 +246,7 @@ router.post("/signin", async (req, res) => {
     const token = jwt.sign(
       {
         id: String(user._id),
-        username: user.username,
-        tag: user.tag,
-        profile_pic: user.profile_pic,
+        email: user.email,
       },
       process.env.ACCESS_TOKEN
     );
