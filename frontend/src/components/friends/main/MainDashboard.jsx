@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Search,
   MessageCircle,
@@ -29,6 +29,25 @@ const OPTION_IMAGES = [
   add_friend_wumpus,
 ];
 
+function getFriendInputError(value) {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return "Enter a username tag to send a request.";
+  }
+
+  const parts = trimmedValue.split("#");
+  if (parts.length !== 2) {
+    return "Use Username#0001 or #0001.";
+  }
+
+  if (!/^[0-9]{4}$/.test(parts[1])) {
+    return "Friend tags must be exactly 4 numbers.";
+  }
+
+  return "";
+}
+
 function MainDashboard({ user_relations }) {
   const dispatch = useDispatch();
   const option_check = useSelector((state) => state.selected_option.value);
@@ -44,10 +63,10 @@ function MainDashboard({ user_relations }) {
   const profile_pic = useSelector((state) => state.user_info.profile_pic);
   const id = useSelector((state) => state.user_info.id);
 
-  const [button_state, setbutton_state] = useState(true);
   const [input, setinput] = useState("");
   const [query, setQuery] = useState("");
   const [actionBusy, setActionBusy] = useState({});
+  const [addingFriend, setAddingFriend] = useState(false);
   const image = OPTION_IMAGES[option_check] || OPTION_IMAGES[0];
   const [alert, setalert] = useState({ style: "none", message: "none" });
 
@@ -68,6 +87,13 @@ function MainDashboard({ user_relations }) {
     }
     return [];
   }, [pending_reqs, friends, option_check, onlineUsers]);
+
+  const friendInputError = useMemo(
+    () => getFriendInputError(input),
+    [input]
+  );
+  const showFriendInputError = input.length > 0 && Boolean(friendInputError);
+  const canSendFriendRequest = !friendInputError && !addingFriend;
 
   const button_clicked = async (message, friend_data) => {
     if (message === "Message") {
@@ -220,66 +246,77 @@ function MainDashboard({ user_relations }) {
   const add_friend = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`${url}/add_friend`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": localStorage.getItem("token"),
-      },
-      body: JSON.stringify({
-        friend: input,
-      }),
-    });
-    const data = await res.json();
-
-    if (
-      data.status === 404 ||
-      data.status === 201 ||
-      data.status === 202 ||
-      data.status === 203
-    ) {
-      setalert({ style: "flex", message: data.message });
+    const friend = input.trim();
+    const validationError = getFriendInputError(friend);
+    if (validationError) {
+      setalert({ style: "flex", message: validationError });
+      return;
     }
 
-    if (data.status === 201 || data.status === 203) {
-      dispatch(update_options());
-      if (data.status === 203) {
-        socket.emit("send_req", data.receiver_id, id, profile_pic, username);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setalert({
+        style: "flex",
+        message: "Session expired. Please log in again.",
+      });
+      return;
+    }
+
+    setAddingFriend(true);
+    setalert({ style: "none", message: "none" });
+
+    try {
+      const res = await fetch(`${url}/add_friend`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token,
+        },
+        body: JSON.stringify({
+          friend,
+        }),
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
       }
-    } else if (data.status === 400) {
-      setalert({ style: "flex", message: data.message });
+
+      const status = data?.status ?? res.status;
+      const message =
+        data?.message ||
+        (status === 203 ? "Request sent successfully" : "Something went wrong");
+
+      if ([400, 401, 404, 201, 202, 203].includes(status)) {
+        setalert({ style: "flex", message });
+      }
+
+      if (status === 201 || status === 203) {
+        dispatch(update_options());
+        if (status === 203) {
+          setinput("");
+          if (data?.receiver_id) {
+            socket.emit("send_req", data.receiver_id, id, profile_pic, username);
+          }
+        }
+      } else if (![400, 401, 404, 202].includes(status)) {
+        setalert({ style: "flex", message });
+      }
+    } catch {
+      setalert({
+        style: "flex",
+        message: "Network error. Please try again.",
+      });
+    } finally {
+      setAddingFriend(false);
     }
   };
-
-  useEffect(() => {
-    if (input.length >= 1) {
-      setbutton_state(false);
-    } else {
-      setbutton_state(true);
-    }
-  }, [input]);
 
   function handle_input(e) {
     setinput(e.target.value);
     setalert({ ...alert, style: "none" });
-    let current_key = e.nativeEvent.data;
-    let input_size = input.length;
-    if (
-      input[input_size - 1] === "#" &&
-      /[0-9]/.test(current_key) === false &&
-      current_key != null
-    ) {
-      setinput(input);
-    } else if (
-      (input[input_size - 5] === "#" &&
-        /[a-zA-z0-9]/.test(current_key) === true &&
-        current_key != null) ||
-      (input[input_size - 5] === "#" &&
-        /[^a-zA-z0-9]/.test(current_key) === true &&
-        current_key != null)
-    ) {
-      setinput(input);
-    }
   }
 
   const filteredOptionData = option_data.filter((elem) => {
@@ -309,7 +346,10 @@ function MainDashboard({ user_relations }) {
                   <div className="mt-3 text-2xl font-black tracking-tight text-white">
                     Grow your circle
                   </div>
-                  <div className="mt-2 max-w-xl text-sm font-semibold text-white/60">
+                  <div
+                    id="add-friend-format-help"
+                    className="mt-2 max-w-xl text-sm font-semibold text-white/60"
+                  >
                     Add a friend with their Discord Tag. Use{" "}
                     <span className="font-extrabold text-white/80">
                       Username#0001
@@ -327,10 +367,32 @@ function MainDashboard({ user_relations }) {
                         onChange={handle_input}
                         value={input}
                         placeholder="Enter Username#0001 or #0001"
+                        autoComplete="off"
+                        aria-invalid={showFriendInputError ? "true" : "false"}
+                        aria-describedby={
+                          showFriendInputError
+                            ? "add-friend-input-error"
+                            : "add-friend-format-help"
+                        }
                       />
+                      {showFriendInputError ? (
+                        <p
+                          id="add-friend-input-error"
+                          className="mt-2 text-xs font-semibold text-red-200"
+                        >
+                          {friendInputError}
+                        </p>
+                      ) : null}
                     </div>
-                    <Button type="submit" disabled={button_state}>
-                      Send request
+                    <Button type="submit" disabled={!canSendFriendRequest}>
+                      {addingFriend ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Sending
+                        </>
+                      ) : (
+                        "Send request"
+                      )}
                     </Button>
                   </form>
 
