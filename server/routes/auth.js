@@ -1,7 +1,9 @@
+import crypto from "crypto";
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
+import { buildAuthUserJwtPayload } from "../lib/authJwtPayload.js";
 import { OTP_TTL_MS } from "../config/constants.js";
 import { authToken } from "../middleware/auth.js";
 import User from "../models/User.js";
@@ -14,6 +16,36 @@ import {
 
 const router = express.Router();
 
+function looksLikeBcryptHash(storedPassword) {
+  return (
+    typeof storedPassword === "string" &&
+    /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(storedPassword)
+  );
+}
+
+function constantTimeStringEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  try {
+    const bufA = Buffer.from(a, "utf8");
+    const bufB = Buffer.from(b, "utf8");
+    if (bufA.length !== bufB.length) return false;
+    return crypto.timingSafeEqual(bufA, bufB);
+  } catch {
+    return false;
+  }
+}
+
+async function verifyStoredPassword(plainPassword, storedPassword) {
+  if (looksLikeBcryptHash(storedPassword)) {
+    try {
+      return await bcrypt.compare(plainPassword, storedPassword);
+    } catch {
+      return false;
+    }
+  }
+  return constantTimeStringEqual(plainPassword, storedPassword);
+}
+
 router.post("/verify_route", authToken, (req, res) => {
   res.status(201).json({ message: "authorized", status: 201 });
 });
@@ -21,8 +53,6 @@ router.post("/verify_route", authToken, (req, res) => {
 router.post("/signup", async (req, res) => {
   const { email, username, password, dob } = req.body;
   const authorized = false;
-
-  const hashedPassword = await bcrypt.hash(password, 10);
 
   const response = await signup(email, username, password, dob);
 
@@ -35,6 +65,12 @@ router.post("/signup", async (req, res) => {
       .status(response.status)
       .json({ message: response.message, status: response.status });
   }
+
+  if (typeof password !== "string" || password.length === 0) {
+    return res.status(204).json({ message: "wrong input", status: 204 });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   if (response.message === true) {
     const otp = generateOTP();
@@ -219,15 +255,28 @@ router.post("/resend_otp", async (req, res) => {
 
 router.post("/signin", async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email }).lean();
+    const email = req.body.email;
+    const plainPassword = req.body.password;
+    if (
+      typeof email !== "string" ||
+      email.length === 0 ||
+      typeof plainPassword !== "string" ||
+      plainPassword.length === 0
+    ) {
+      return res
+        .status(442)
+        .json({ error: "invalid username or password", status: 442 });
+    }
+
+    const user = await User.findOne({ email }).lean();
     if (!user) {
       return res
         .status(442)
         .json({ error: "invalid username or password", status: 442 });
     }
 
-    const validPassword = await bcrypt.compare(
-      req.body.password,
+    const validPassword = await verifyStoredPassword(
+      plainPassword,
       user.password
     );
 
@@ -243,11 +292,13 @@ router.post("/signin", async (req, res) => {
         .json({ error: "you are not verified yet", status: 422 });
     }
 
+    if (!looksLikeBcryptHash(user.password)) {
+      const newHash = await bcrypt.hash(plainPassword, 10);
+      await User.updateOne({ _id: user._id }, { $set: { password: newHash } });
+    }
+
     const token = jwt.sign(
-      {
-        id: String(user._id),
-        email: user.email,
-      },
+      buildAuthUserJwtPayload(user),
       process.env.ACCESS_TOKEN
     );
     return res

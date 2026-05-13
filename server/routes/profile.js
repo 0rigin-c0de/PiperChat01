@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 
+import { buildAuthUserJwtPayload } from "../lib/authJwtPayload.js";
 import { authToken } from "../middleware/auth.js";
 import User from "../models/User.js";
 
@@ -156,10 +157,7 @@ router.patch("/profile", authToken, async (req, res) => {
     });
 
     const token = jwt.sign(
-      {
-        id: String(updated._id),
-        email: updated.email,
-      },
+      buildAuthUserJwtPayload(updated),
       process.env.ACCESS_TOKEN
     );
 

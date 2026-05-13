@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test:auth:unit": "node scripts/run-auth-jwt-unit.mjs",
+    "test:auth": "node scripts/run-auth-integration.mjs"
   },
   "author": "shunnu",
   "license": "ISC",
@@ -23,5 +25,8 @@
     "redis": "^5.11.0",
     "shortid": "^2.2.16",
     "socket.io": "^4.5.4"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.1.0"
   }
 }
