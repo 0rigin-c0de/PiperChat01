@@ -1,117 +1,188 @@
-import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
+import { describe, it, expect, beforeAll, beforeEach, jest } from "@jest/globals";
 import supertest from "supertest";
 import express from "express";
 
-// Mock the auth router without DB connection
-const app = express();
-app.use(express.json());
+// ── Mocks must be declared before the real router is imported ──
 
-// Mock responses for testing route structure
-app.post("/signup", (req, res) => {
-  const { email, username, password, dob } = req.body;
-  if (!email || !username || !password || !dob) {
-    return res.status(400).json({ message: "Missing required fields", status: 400 });
-  }
-  return res.status(201).json({ message: "data saved", status: 201 });
+const mockUserFindOne = jest.fn();
+const mockUserUpdateOne = jest.fn();
+const mockUserSave = jest.fn();
+
+jest.unstable_mockModule("../models/User.js", () => {
+  function MockUser(data) { Object.assign(this, data); }
+  MockUser.findOne = (q) => ({ lean: () => mockUserFindOne(q) });
+  MockUser.updateOne = mockUserUpdateOne;
+  MockUser.prototype.save = mockUserSave;
+  return { default: MockUser };
 });
 
-app.post("/signin", (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(442).json({ error: "invalid username or password", status: 442 });
-  }
-  if (email === "test@test.com" && password === "correctpassword") {
-    return res.status(201).json({ message: "you are verified", status: 201, token: "mock_token" });
-  }
-  return res.status(442).json({ error: "invalid username or password", status: 442 });
+const mockSignup = jest.fn();
+const mockIsUsernameAvailable = jest.fn();
+const mockUpdatingCreds = jest.fn();
+
+jest.unstable_mockModule("../services/userService.js", () => ({
+  signup: mockSignup,
+  isUsernameAvailable: mockIsUsernameAvailable,
+  updatingCreds: mockUpdatingCreds,
+}));
+
+const mockSendMail = jest.fn();
+
+jest.unstable_mockModule("../services/email.js", () => ({
+  generateOTP: () => "123456",
+  sendMail: mockSendMail,
+}));
+
+jest.unstable_mockModule("../middleware/auth.js", () => ({
+  authToken: (_req, _res, next) => next(),
+}));
+
+jest.unstable_mockModule("../config/constants.js", () => ({
+  OTP_TTL_MS: 300000,
+}));
+
+// ── Build app with the real router after mocks are registered ──
+
+let request;
+
+beforeAll(async () => {
+  process.env.ACCESS_TOKEN = "test_secret";
+  const { default: authRouter } = await import("../routes/auth.js");
+  const app = express();
+  app.use(express.json());
+  app.use(authRouter);
+  request = supertest(app);
 });
 
-app.post("/verify", (req, res) => {
-  const { email, otp_value } = req.body;
-  if (!email || !otp_value) {
-    return res.status(400).json({ error: "Missing fields", status: 400 });
-  }
-  return res.status(201).json({ message: "Congrats you are verified now", status: 201 });
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockSendMail.mockResolvedValue({ ok: true });
+  mockUserUpdateOne.mockResolvedValue({});
+  mockUserSave.mockResolvedValue({});
+  mockIsUsernameAvailable.mockResolvedValue({ final_tag: "1234" });
 });
 
-app.post("/resend_otp", (req, res) => {
-  const { email } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: "Missing email", status: 400 });
-  }
-  return res.status(201).json({ message: "otp resent", status: 201 });
-});
+// ── Tests use the real route handlers, only DB/email are mocked ──
 
-const request = supertest(app);
-
-describe("Auth Routes", () => {
-  describe("POST /signup", () => {
-    it("should return 400 if required fields are missing", async () => {
-      const res = await request.post("/signup").send({ email: "test@test.com" });
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 201 if all fields are provided", async () => {
-      const res = await request.post("/signup").send({
-        email: "test@test.com",
-        username: "testuser",
-        password: "password123",
-        dob: "2000-01-01",
-      });
-      expect(res.status).toBe(201);
-    });
+describe("POST /signup", () => {
+  it("returns 400 when userService reports missing fields", async () => {
+    mockSignup.mockResolvedValue({ status: 400, message: "Missing required fields" });
+    const res = await request.post("/signup").send({ email: "a@a.com" });
+    expect(res.status).toBe(400);
   });
 
-  describe("POST /signin", () => {
-    it("should return 442 if credentials are missing", async () => {
-      const res = await request.post("/signin").send({});
-      expect(res.status).toBe(442);
+  it("returns 201 and sends email when signup succeeds", async () => {
+    mockSignup.mockResolvedValue({ message: true });
+    const res = await request.post("/signup").send({
+      email: "new@test.com",
+      username: "newuser",
+      password: "pass123",
+      dob: "2000-01-01",
     });
-
-    it("should return 442 if credentials are incorrect", async () => {
-      const res = await request.post("/signin").send({
-        email: "wrong@test.com",
-        password: "wrongpassword",
-      });
-      expect(res.status).toBe(442);
-    });
-
-    it("should return 201 and token if credentials are correct", async () => {
-      const res = await request.post("/signin").send({
-        email: "test@test.com",
-        password: "correctpassword",
-      });
-      expect(res.status).toBe(201);
-      expect(res.body).toHaveProperty("token");
-    });
+    expect(res.status).toBe(201);
+    expect(res.body.message).toBe("data saved");
   });
 
-  describe("POST /verify", () => {
-    it("should return 400 if fields are missing", async () => {
-      const res = await request.post("/verify").send({ email: "test@test.com" });
-      expect(res.status).toBe(400);
+  it("returns 204 when email already in use", async () => {
+    mockSignup.mockResolvedValue({ status: 204, message: "Email already in use" });
+    const res = await request.post("/signup").send({
+      email: "exists@test.com",
+      username: "u",
+      password: "p",
+      dob: "2000-01-01",
     });
+    expect(res.status).toBe(204);
+  });
+});
 
-    it("should return 201 if email and otp are provided", async () => {
-      const res = await request.post("/verify").send({
-        email: "test@test.com",
-        otp_value: "123456",
-      });
-      expect(res.status).toBe(201);
-    });
+describe("POST /signin", () => {
+  it("returns 442 when user is not found", async () => {
+    mockUserFindOne.mockResolvedValue(null);
+    const res = await request.post("/signin").send({ email: "no@one.com", password: "x" });
+    expect(res.status).toBe(442);
   });
 
-  describe("POST /resend_otp", () => {
-    it("should return 400 if email is missing", async () => {
-      const res = await request.post("/resend_otp").send({});
-      expect(res.status).toBe(400);
-    });
+  it("returns 442 when password is wrong", async () => {
+    mockUserFindOne.mockResolvedValue({ email: "u@u.com", password: "correct", authorized: true });
+    const res = await request.post("/signin").send({ email: "u@u.com", password: "wrong" });
+    expect(res.status).toBe(442);
+  });
 
-    it("should return 201 if email is provided", async () => {
-      const res = await request.post("/resend_otp").send({
-        email: "test@test.com",
-      });
-      expect(res.status).toBe(201);
+  it("returns 422 when user is not verified", async () => {
+    mockUserFindOne.mockResolvedValue({ email: "u@u.com", password: "pass", authorized: false });
+    const res = await request.post("/signin").send({ email: "u@u.com", password: "pass" });
+    expect(res.status).toBe(422);
+  });
+
+  it("returns 201 with token when credentials are correct", async () => {
+    mockUserFindOne.mockResolvedValue({
+      _id: "abc123",
+      email: "u@u.com",
+      password: "pass",
+      authorized: true,
+      username: "user1",
+      tag: "0001",
+      profile_pic: "",
     });
+    const res = await request.post("/signin").send({ email: "u@u.com", password: "pass" });
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("token");
+  });
+});
+
+describe("POST /verify", () => {
+  it("returns 404 when user is not found", async () => {
+    mockUserFindOne.mockResolvedValue(null);
+    const res = await request.post("/verify").send({ email: "no@one.com", otp_value: "111111" });
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 432 when OTP is wrong but not expired", async () => {
+    mockUserFindOne.mockResolvedValue({
+      username: "u",
+      verification: [{ timestamp: Date.now(), code: "999999" }],
+    });
+    const res = await request.post("/verify").send({ email: "u@u.com", otp_value: "000000" });
+    expect(res.status).toBe(432);
+  });
+
+  it("returns 201 when OTP is correct and not expired", async () => {
+    mockUserFindOne.mockResolvedValue({
+      username: "u",
+      verification: [{ timestamp: Date.now(), code: "123456" }],
+    });
+    const res = await request.post("/verify").send({ email: "u@u.com", otp_value: "123456" });
+    expect(res.status).toBe(201);
+  });
+
+  it("returns 442 and sends new OTP when OTP is expired", async () => {
+    mockUserFindOne.mockResolvedValue({
+      username: "u",
+      verification: [{ timestamp: Date.now() - 400000, code: "123456" }],
+    });
+    const res = await request.post("/verify").send({ email: "u@u.com", otp_value: "123456" });
+    expect(res.status).toBe(442);
+    expect(mockSendMail).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("POST /resend_otp", () => {
+  it("returns 404 when user is not found", async () => {
+    mockUserFindOne.mockResolvedValue(null);
+    const res = await request.post("/resend_otp").send({ email: "no@one.com" });
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 409 when user is already verified", async () => {
+    mockUserFindOne.mockResolvedValue({ authorized: true, username: "u" });
+    const res = await request.post("/resend_otp").send({ email: "u@u.com" });
+    expect(res.status).toBe(409);
+  });
+
+  it("returns 201 and sends OTP for unverified user", async () => {
+    mockUserFindOne.mockResolvedValue({ authorized: false, username: "u" });
+    const res = await request.post("/resend_otp").send({ email: "u@u.com" });
+    expect(res.status).toBe(201);
+    expect(mockSendMail).toHaveBeenCalledTimes(1);
   });
 });
