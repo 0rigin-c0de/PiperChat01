@@ -235,6 +235,18 @@ function ValidChat() {
               Retry
             </Button>
           </div>
+        ) : all_messages && all_messages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-white/5">
+              <Hash className="h-8 w-8 text-brand-300" />
+            </div>
+            <div className="text-2xl font-extrabold tracking-tight text-white">
+              Welcome to #{channel_name}!
+            </div>
+            <div className="text-white/60">
+              This is the start of the #{channel_name} channel. Send a message to start the conversation!
+            </div>
+          </div>
         ) : (
           <>
             <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-soft backdrop-blur-xl">
