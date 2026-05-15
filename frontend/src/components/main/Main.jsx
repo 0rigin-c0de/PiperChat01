@@ -6,7 +6,7 @@ import socket from '../socket/Socket';
 import { update_options } from '../../store/optionsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import discord_logo from '../../images/discord_logo_3.png'
-import { resolveProfilePic } from '../../shared/imageFallbacks';
+import { resolveProfilePic, handleImageError } from '../../shared/imageFallbacks';
 import DirectMessage from '../directMessages/DirectMessage';
 import { X } from "lucide-react";
 
@@ -105,6 +105,7 @@ function Main({user_relations}) {
                   src={resolveProfilePic(req_popup_data.profile_pic, req_popup_data.name)}
                   alt=""
                   className="h-full w-full object-cover"
+                  onError={handleImageError}
                 />
               </div>
               <div className="min-w-0">

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { resolveProfilePic } from "../../shared/imageFallbacks";
+import { resolveProfilePic, handleImageError } from "../../shared/imageFallbacks";
 import socket from "../socket/Socket";
 import { clear_dm_unread } from "../../store/unreadSlice";
 import { Button } from "../ui/button";
@@ -218,6 +218,7 @@ function DirectMessage() {
             src={resolveProfilePic(activeFriend.profile_pic, activeFriend.username)}
             alt=""
             className="h-full w-full object-cover"
+            onError={handleImageError}
           />
         </div>
         <div className="min-w-0">
@@ -249,6 +250,7 @@ function DirectMessage() {
                       src={resolveProfilePic(message.sender_pic, message.sender_name)}
                       alt=""
                       className="h-full w-full object-cover"
+                      onError={handleImageError}
                     />
                   </div>
                 ) : null}
@@ -332,6 +334,7 @@ function DirectMessage() {
                       src={resolveProfilePic(currentUser.profile_pic, currentUser.username)}
                       alt=""
                       className="h-full w-full object-cover"
+                      onError={handleImageError}
                     />
                   </div>
                 ) : null}
