@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 const onlineUsers = new Map();
 
 function emitPresenceSnapshot(socket) {
@@ -49,15 +51,27 @@ function setUserOffline(io, userId, socketId) {
 }
 
 function attachSocketHandlers(io) {
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) return next(new Error("Authentication required"));
+    try {
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
+      socket.data.user = decoded; // { id, username, tag, profile_pic }
+      next();
+    } catch (err) {
+      next(new Error("Invalid token"));
+    }
+  });
+
+  
   io.on("connection", (socket) => {
     socket.on("channelCreated", (data) => {
       io.emit("newChannel", data);
     });
-  });
 
-  io.on("connection", (socket) => {
-    socket.on("get_userid", (user_id) => {
-      const normalizedUserId = String(user_id);
+    socket.on("get_userid", () => {
+       
+      const normalizedUserId = String(socket.data.user.id);
 
       if (socket.data.user_id === normalizedUserId) {
         socket.join(normalizedUserId);
@@ -121,21 +135,19 @@ function attachSocketHandlers(io) {
       socket.data.server_id = normalizedServerId;
       socket.join(`server:${normalizedServerId}`);
     });
-
-    socket.on(
-      "send_message",
-      (channel_id, message, timestamp, sender_name, sender_tag, sender_pic) => {
-        socket.to(channel_id).emit("recieve_message", {
-          message_data: {
-            message,
-            timestamp,
-            sender_name,
-            sender_tag,
-            sender_pic,
-          },
-        });
-      }
-    );
+ 
+    socket.on("send_message", (channel_id, message, timestamp) => {
+      const { username, tag, profile_pic } = socket.data.user;
+      socket.to(channel_id).emit("recieve_message", {
+        message_data: {
+          message,
+          timestamp,
+          sender_name: username,
+          sender_tag: tag,
+          sender_pic: profile_pic,
+        },
+      });
+    });
 
     socket.on("disconnect", () => {
       setUserOffline(io, socket.data.user_id, socket.id);
