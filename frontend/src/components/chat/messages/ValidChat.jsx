@@ -281,7 +281,7 @@ function ValidChat() {
                 key={`${elem.timestamp}-${elem.sender_id}`}
                 className="group flex gap-2 rounded-2xl px-1 py-1.5 transition hover:bg-white/5 sm:gap-3 sm:px-2 sm:py-2"
               >
-                <div className="relative mt-4 h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40 sm:mt-1 sm:h-10 sm:w-10">
+                <div className="relative mt-4 h-9 w-9 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:mt-3 sm:h-10 sm:w-10">
                   <img
                     src={resolveProfilePic(elem.sender_pic, elem.sender_name)}
                     alt=""
