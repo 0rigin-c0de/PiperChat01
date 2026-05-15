@@ -290,7 +290,13 @@ function ValidChat() {
                           if (e.key === "Enter" && editingContent.trim()) {
                             editMessage(elem);
                           }
+                          // GSSoC Fix: Close edit mode on Escape key press
+                          if (e.key === "Escape") {
+                            setEditingTimestamp(null);
+                            setEditingContent("");
+                          }
                         }}
+                        autoFocus
                       />
                       <Button
                         type="button"
