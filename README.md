@@ -66,6 +66,7 @@ graph TD
     style Redis fill:#FF4438,color:#fff
     style Mongo fill:#47A248,color:#fff
     style ResendService fill:#f39c12,stroke:#333,stroke-width:2px,color:#fff
+```
 
 ## Quick start
 
