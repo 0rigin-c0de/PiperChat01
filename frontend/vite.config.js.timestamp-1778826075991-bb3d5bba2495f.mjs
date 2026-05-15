@@ -1,7 +1,7 @@
 // vite.config.js
-import { defineConfig, loadEnv } from "file:///S:/playground/contribution/PiperChat01/PiperChat01/frontend/node_modules/vite/dist/node/index.js";
-import react from "file:///S:/playground/contribution/PiperChat01/PiperChat01/frontend/node_modules/@vitejs/plugin-react/dist/index.js";
-import tailwindcss from "file:///S:/playground/contribution/PiperChat01/PiperChat01/frontend/node_modules/@tailwindcss/vite/dist/index.mjs";
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 var vite_config_default = defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const processEnvShim = {
