@@ -28,8 +28,13 @@ function ValidChat() {
   const [editingContent, setEditingContent] = useState("");
 
   useEffect(() => {
-    socket.emit("join_chat", channel_id);
-  }, [channel_id]);
+    if(socket && channel_id){
+      socket.emit("join_chat", {
+        channel_id: channel_id,
+        server_id: server_id
+      })
+    }
+  }, [channel_id,server_id]);
 
   const sendNow = async () => {
     if (!chat_message.trim()) return;
@@ -192,8 +197,8 @@ function ValidChat() {
         )
       );
     };
-
-    socket.on("server_message_received", handleReceiveMessage);
+    //earlier it was server_message_receive which was wrong
+    socket.on("receive_message", handleReceiveMessage);
     socket.on("server_message_updated", handleUpdatedMessage);
     socket.on("server_message_deleted", handleDeletedMessage);
 
