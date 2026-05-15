@@ -3,7 +3,7 @@ import Navbar2Dashboard from "../friends/sidebar/Navbar2Dashboard";
 import Navbar2Chat from "../chat/sidebar/Navbar2Chat";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { resolveProfilePic } from "../../shared/imageFallbacks";
+import { resolveProfilePic, handleImageError } from "../../shared/imageFallbacks";
 import SettingsDialog from "../settings/SettingsDialog";
 
 function Navbar2({ friends, onNavigate }) {
@@ -49,6 +49,7 @@ function Navbar2({ friends, onNavigate }) {
               src={profile_pic}
               alt=""
               className="h-full w-full object-cover"
+              onError={handleImageError}
             />
           </div>
           <span className="absolute -bottom-0.5 -right-0.5 z-10 h-3.5 w-3.5 rounded-full border-2 border-panel2 bg-emerald-400" />

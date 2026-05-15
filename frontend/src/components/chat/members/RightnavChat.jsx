@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { resolveProfilePic } from "../../../shared/imageFallbacks";
+import { resolveProfilePic, handleImageError } from "../../../shared/imageFallbacks";
 
 function RightnavChat() {
   const all_users = useSelector((state) => state.currentPage.members);
@@ -26,6 +26,7 @@ function RightnavChat() {
                     src={resolveProfilePic(elem.user_profile_pic, elem.user_name)}
                     alt=""
                     className="h-full w-full object-cover"
+                    onError={handleImageError}
                   />
                 </div>
                 <span
