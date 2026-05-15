@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import Invite from "./components/invite/Invite";
 import NotificationListener from "./components/notifications/NotificationListener";
+import NotFound from "./components/notFound/NotFound";
 import { AnimatePresence } from "framer-motion";
 
 function AnimatedRoutes() {
@@ -24,6 +25,7 @@ function AnimatedRoutes() {
           <Route path="/channels/:server_id" element={<Dashboard />}></Route>
           <Route path="/invite/:invite_link" element={<Invite />}></Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
   );
