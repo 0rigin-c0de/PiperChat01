@@ -266,7 +266,7 @@ function ValidChat() {
           </div>
         </div>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-5 space-y-1.5 sm:space-y-2">
           {(all_messages || []).map((elem) => {
             const date = new Date(Number(elem.timestamp));
             const timestamp = `${date.toDateString()}, ${String(
@@ -279,9 +279,9 @@ function ValidChat() {
             return (
               <div
                 key={`${elem.timestamp}-${elem.sender_id}`}
-                className="group -mx-2 flex gap-3 rounded-2xl px-2 py-2 transition hover:bg-white/5"
+                className="group flex gap-2 rounded-2xl px-1 py-1.5 transition hover:bg-white/5 sm:gap-3 sm:px-2 sm:py-2"
               >
-                <div className="relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+                <div className="relative mt-4 h-9 w-9 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:mt-3 sm:h-10 sm:w-10">
                   <img
                     src={resolveProfilePic(elem.sender_pic, elem.sender_name)}
                     alt=""
@@ -291,11 +291,11 @@ function ValidChat() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
                     <div className="text-sm font-extrabold text-white/85">
                       {elem.sender_name}
                     </div>
-                    <div className="text-xs font-semibold text-white/45">
+                    <div className="text-[10px] leading-none text-white/35">
                       {timestamp}
                     </div>
                     {mine ? (
@@ -353,7 +353,7 @@ function ValidChat() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-white/85">
+                    <div className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-[1.45] text-white/85">
                       {elem.content}
                     </div>
                   )}
