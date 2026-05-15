@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   const processEnvShim = {
-    REACT_APP_URL: env.REACT_APP_URL || env.VITE_API_URL || "",
+    REACT_APP_URL: env.REACT_APP_URL || env.VITE_APP_URL || "",
     REACT_APP_front_end_url:
       env.REACT_APP_front_end_url || env.VITE_FRONTEND_URL || "",
     REACT_APP_SUPABASE_URL: env.REACT_APP_SUPABASE_URL || "",

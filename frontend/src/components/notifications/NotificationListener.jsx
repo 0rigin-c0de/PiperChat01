@@ -21,7 +21,7 @@ function NotificationListener() {
   const userId = useSelector((state) => state.user_info.id);
   const activeFriend = useSelector((state) => state.direct_message.activeFriend);
   const activeChannelId = useSelector((state) => state.currentPage.page_id);
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_APP_URL;
 
   const pathParts = location.pathname.split("/");
   const activeServerId = pathParts[2];

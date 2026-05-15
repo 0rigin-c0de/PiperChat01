@@ -103,7 +103,7 @@ function Navbar({ new_req_recieved, user_cred, onNavigate }) {
   const create_server = async () => {
     const image_url = await upload_server_image();
 
-    const res = await fetch(`${process.env.REACT_APP_URL}/create_server`, {
+    const res = await fetch(`${import.meta.env.VITE_APP_URL}/create_server`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
