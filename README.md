@@ -83,9 +83,9 @@ Server runs on `http://localhost:2000`
 | ----------------------------- | -------: | -------------------------------------- |
 | `REACT_APP_URL`               |       ✅ | Backend URL (`http://localhost:2000`)  |
 | `REACT_APP_front_end_url`     |       ✅ | Frontend URL (`http://localhost:5173`) |
-| `REACT_APP_SUPABASE_URL`      |       ❌ | For avatar uploads                     |
-| `REACT_APP_SUPABASE_ANON_KEY` |       ❌ | For avatar uploads                     |
-| `REACT_APP_SUPABASE_BUCKET`   |       ❌ | For avatar uploads                     |
+| `VITE_SUPABASE_URL`           |       ❌ | For avatar uploads                     |
+| `VITE_SUPABASE_ANON_KEY`      |       ❌ | For avatar uploads                     |
+| `VITE_SUPABASE_BUCKET`        |       ❌ | For avatar uploads                     |
 
 ## Scripts
 

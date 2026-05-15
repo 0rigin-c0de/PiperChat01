@@ -9,9 +9,6 @@ export default defineConfig(({ mode }) => {
     REACT_APP_URL: env.REACT_APP_URL || env.VITE_API_URL || "",
     REACT_APP_front_end_url:
       env.REACT_APP_front_end_url || env.VITE_FRONTEND_URL || "",
-    REACT_APP_SUPABASE_URL: env.REACT_APP_SUPABASE_URL || "",
-    REACT_APP_SUPABASE_ANON_KEY: env.REACT_APP_SUPABASE_ANON_KEY || "",
-    REACT_APP_SUPABASE_BUCKET: env.REACT_APP_SUPABASE_BUCKET || "",
   };
 
   return {
