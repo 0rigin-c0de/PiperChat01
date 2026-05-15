@@ -105,8 +105,8 @@ function attachSocketHandlers(io) {
       const channel_id = typeof data === "object" ? data.channel_id : data;
       const normalizedChannelId = String(channel_id || "");
 
-      console.log("Socket room report...debug");
-      console.log("Current rooms:", socket.rooms);
+      // console.log("Socket room report...debug");
+      // console.log("Current rooms:", socket.rooms);
 
       if (!normalizedChannelId) {
         return;
@@ -119,14 +119,14 @@ function attachSocketHandlers(io) {
       ) {
         socket.leave(socket.data.active_channel_id);
         socket.leave(`channel:${socket.data.active_channel_id}`);
-        console.log(
-          `Socket ${socket.id} left the channel: ${socket.data.active_channel_id}`,
-        );
+        // console.log(
+        //   `Socket ${socket.id} left the channel: ${socket.data.active_channel_id}`,
+        // );
       }
 
       socket.data.active_channel_id = normalizedChannelId;
       socket.join(`channel:${normalizedChannelId}`);
-      console.log("Now in thr room:", `channel:${normalizedChannelId}`);
+      // console.log("Now in thr room:", `channel:${normalizedChannelId}`);
     });
 
     socket.on("join_server", (server_id) => {

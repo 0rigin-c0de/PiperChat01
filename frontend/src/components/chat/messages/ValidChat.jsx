@@ -198,7 +198,7 @@ function ValidChat() {
       );
     };
     //earlier it was server_message_receive which was wrong
-    socket.on("receive_message", handleReceiveMessage);
+    socket.on("server_message_received", handleReceiveMessage);
     socket.on("server_message_updated", handleUpdatedMessage);
     socket.on("server_message_deleted", handleDeletedMessage);
 

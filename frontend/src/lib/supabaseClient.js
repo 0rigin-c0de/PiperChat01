@@ -9,7 +9,7 @@ const isValidConfig = (url, key) => {
   );
 };
 export const supabase = isValidConfig(supabaseUrl, supabaseAnonKey)
-  ? createClient(supabase, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
   : (console.warn(
       "Supabase config is missing or invalid.Authentication features will be compromised/disabled.",
     ),
