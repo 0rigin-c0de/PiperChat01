@@ -11,3 +11,7 @@ export function resolveProfilePic(profilePic, seed) {
 
   return getDefaultProfilePic(seed);
 }
+
+export function handleImageError(e) {
+  e.target.src = getDefaultProfilePic();
+}

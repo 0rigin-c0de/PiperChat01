@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { clear_channel_unread } from "../../../store/unreadSlice";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
+import { resolveProfilePic, handleImageError } from "../../../shared/imageFallbacks";
 
 function ValidChat() {
   const dispatch = useDispatch();
@@ -282,9 +283,10 @@ function ValidChat() {
               >
                 <div className="relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
                   <img
-                    src={elem.sender_pic}
+                    src={resolveProfilePic(elem.sender_pic, elem.sender_name)}
                     alt=""
                     className="h-full w-full object-cover"
+                    onError={handleImageError}
                   />
                 </div>
 
