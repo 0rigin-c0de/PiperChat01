@@ -20,7 +20,7 @@ function ServerDetails({ new_req_recieved, elem, onNavigate }) {
   const [selectedValue, setSelectedValue] = useState("text");
   const [category_name, setcategory_name] = useState("");
   const [new_channel_name, setnew_channel_name] = useState("");
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_APP_URL;
   const [channel_creation_progess, setchannel_creation_progess] = useState({
     text: "Create Channel",
     disabled: false,
