@@ -87,6 +87,15 @@ Server runs on `http://localhost:2000`
 | `REACT_APP_SUPABASE_ANON_KEY` |       ❌ | For avatar uploads                     |
 | `REACT_APP_SUPABASE_BUCKET`   |       ❌ | For avatar uploads                     |
 
+## Screenshots
+
+### Login Page
+
+![Login Page](login.png)
+
+### Chat UI
+
+![Chat UI](chat-ui.png)
 ## Scripts
 
 ### Server
