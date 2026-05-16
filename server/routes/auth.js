@@ -16,6 +16,27 @@ import {
 
 const router = express.Router();
 
+function sendVerificationEmailAsync(otp, email, username, context = "signup") {
+  sendMail(otp, email, username)
+    .then((mailResult) => {
+      if (!mailResult.ok) {
+        console.warn(`[auth/${context}] Verification email not sent:`, {
+          email,
+          reason: mailResult.reason,
+          provider: mailResult.provider,
+          error: mailResult.error?.message,
+        });
+      }
+    })
+    .catch((err) => {
+      console.error(`[auth/${context}] sendMail error:`, err?.message || err);
+    });
+}
+
+function signupJson(res, status, payload) {
+  return res.status(status).json({ ok: status >= 200 && status < 300, ...payload });
+}
+
 function looksLikeBcryptHash(storedPassword) {
   return (
     typeof storedPassword === "string" &&
@@ -51,135 +72,158 @@ router.post("/verify_route", authToken, (req, res) => {
 });
 
 router.post("/signup", async (req, res) => {
-  const { email, username, password, dob } = req.body;
-  const authorized = false;
+  const startedAt = Date.now();
+  try {
+    const { email, username, password, dob } = req.body ?? {};
+    const authorized = false;
 
-  const response = await signup(email, username, password, dob);
+    const response = await signup(email, username, password, dob);
 
-  if (
-    response.status === 204 ||
-    response.status === 400 ||
-    response.status === 202
-  ) {
-    return res
-      .status(response.status)
-      .json({ message: response.message, status: response.status });
-  }
-
-  if (typeof password !== "string" || password.length === 0) {
-    return res.status(204).json({ message: "wrong input", status: 204 });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  if (response.message === true) {
-    const otp = generateOTP();
-    const usernameResponse = await isUsernameAvailable(username);
-    const finalTag = usernameResponse.final_tag;
-
-
-    const newUser = new User({
-      username,
-      tag: finalTag,
-      profile_pic: process.env.default_profile_pic,
-      email,
-      password: hashedPassword,
-      dob,
-      authorized,
-      verification: [{ timestamp: Date.now(), code: otp }],
-    });
-
-    const mailResult = await sendMail(otp, email, username);
-    try {
-      await newUser.save();
-    } catch (err) {
-      return res
-        .status(500)
-        .json({ message: "Server error", status: 500, email_sent: false });
+    if (
+      response.status === 204 ||
+      response.status === 400 ||
+      response.status === 202
+    ) {
+      return signupJson(res, response.status, {
+        message: response.message,
+        status: response.status,
+      });
     }
-    return res.status(201).json({
-      message: "data saved",
-      status: 201,
-      email_sent: mailResult.ok,
-    });
-  }
 
-  if (response.message === "not_TLE" || response.message === "TLE_2") {
-    const usernameResponse = await isUsernameAvailable(username);
-    const tag = usernameResponse.final_tag;
-    const accountCreds = {
-      $set: {
+    if (typeof password !== "string" || password.length === 0) {
+      return signupJson(res, 204, { message: "wrong input", status: 204 });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (response.message === true) {
+      const otp = generateOTP();
+      const usernameResponse = await isUsernameAvailable(username);
+      const finalTag = usernameResponse.final_tag;
+
+      const newUser = new User({
         username,
-        tag,
+        tag: finalTag,
+        profile_pic: process.env.default_profile_pic,
         email,
         password: hashedPassword,
         dob,
         authorized,
-      },
-    };
-    let otp = response.message === "not_TLE" ? response.otp : generateOTP();
-    const newResponse = await updatingCreds(
-      accountCreds,
-      otp,
-      email,
-      username
-    );
-    return res
-      .status(newResponse.status)
-      .json({
-        message: newResponse.message,
-        status: newResponse.status,
-        email_sent: Boolean(newResponse.mailResult?.ok),
+        verification: [{ timestamp: Date.now(), code: otp }],
       });
-  }
 
-  if (response.message === "not_TLE_2" || response.message === "TLE") {
-    const tag = response.tag;
-    let accountCreds;
-    let otp;
+      try {
+        await newUser.save();
+      } catch (err) {
+        console.error("[auth/signup] Failed to save user:", err?.message || err);
+        return signupJson(res, 500, {
+          message: "Server error",
+          status: 500,
+          email_sent: false,
+        });
+      }
 
-    if (response.message === "not_TLE_2") {
-      accountCreds = {
-        $set: {
-          username,
-          tag,
-          email,
-          password: hashedPassword,
-          dob,
-          authorized,
-        },
-      };
-      otp = response.otp;
-    } else {
-      otp = generateOTP();
-      accountCreds = {
-        $set: {
-          username,
-          email,
-          tag,
-          password: hashedPassword,
-          dob,
-          authorized,
-          verification: [
-            { timestamp: Date.now(), code: otp },
-          ],
-        },
-      };
+      sendVerificationEmailAsync(otp, email, username, "signup");
+
+      return signupJson(res, 201, {
+        message: "data saved",
+        status: 201,
+        email_sent: null,
+      });
     }
 
-    const newResponse = await updatingCreds(
-      accountCreds,
-      otp,
-      email,
-      username
-    );
-    return res
-      .status(newResponse.status)
-      .json({
+    if (response.message === "not_TLE" || response.message === "TLE_2") {
+      const usernameResponse = await isUsernameAvailable(username);
+      const tag = usernameResponse.final_tag;
+      const accountCreds = {
+        $set: {
+          username,
+          tag,
+          email,
+          password: hashedPassword,
+          dob,
+          authorized,
+        },
+      };
+      const otp =
+        response.message === "not_TLE" ? response.otp : generateOTP();
+      const newResponse = await updatingCreds(
+        accountCreds,
+        otp,
+        email,
+        username
+      );
+      return signupJson(res, newResponse.status, {
         message: newResponse.message,
         status: newResponse.status,
-        email_sent: Boolean(newResponse.mailResult?.ok),
+        email_sent: null,
       });
+    }
+
+    if (response.message === "not_TLE_2" || response.message === "TLE") {
+      const tag = response.tag;
+      let accountCreds;
+      let otp;
+
+      if (response.message === "not_TLE_2") {
+        accountCreds = {
+          $set: {
+            username,
+            tag,
+            email,
+            password: hashedPassword,
+            dob,
+            authorized,
+          },
+        };
+        otp = response.otp;
+      } else {
+        otp = generateOTP();
+        accountCreds = {
+          $set: {
+            username,
+            email,
+            tag,
+            password: hashedPassword,
+            dob,
+            authorized,
+            verification: [{ timestamp: Date.now(), code: otp }],
+          },
+        };
+      }
+
+      const newResponse = await updatingCreds(
+        accountCreds,
+        otp,
+        email,
+        username
+      );
+      return signupJson(res, newResponse.status, {
+        message: newResponse.message,
+        status: newResponse.status,
+        email_sent: null,
+      });
+    }
+
+    console.warn("[auth/signup] Unhandled signup branch:", response);
+    return signupJson(res, 500, {
+      message: "Server error",
+      status: 500,
+      email_sent: false,
+    });
+  } catch (err) {
+    console.error("[auth/signup] Unhandled error:", err?.message || err);
+    if (!res.headersSent) {
+      return signupJson(res, 500, {
+        message: "Server error",
+        status: 500,
+        email_sent: false,
+      });
+    }
+  } finally {
+    if (process.env.SIGNUP_DEBUG === "true") {
+      console.info(`[auth/signup] completed in ${Date.now() - startedAt}ms`);
+    }
   }
 });
 
@@ -217,7 +261,7 @@ router.post("/verify", async (req, res) => {
         },
       }
     );
-    await sendMail(otp, email, username);
+    sendVerificationEmailAsync(otp, email, username, "verify");
     return res.status(442).json({ error: "otp changed", status: 442 });
   } catch (err) {
     return res.status(500).json({ error: "Server error", status: 500 });
@@ -242,11 +286,11 @@ router.post("/resend_otp", async (req, res) => {
       { email },
       { $set: { verification: [{ timestamp: Date.now(), code: otp }] } }
     );
-    const mailResult = await sendMail(otp, email, username);
+    sendVerificationEmailAsync(otp, email, username, "resend_otp");
     return res.status(201).json({
       message: "otp resent",
       status: 201,
-      email_sent: mailResult.ok,
+      email_sent: null,
     });
   } catch (err) {
     return res.status(500).json({ error: "Server error", status: 500 });

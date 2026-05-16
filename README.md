@@ -72,8 +72,11 @@ Server runs on `http://localhost:2000`
 | `ACCESS_TOKEN`                                                   |       ✅ | JWT secret                             |
 | `PORT`                                                           |       ❌ | Default `2000`                         |
 | `default_profile_pic`                                            |       ✅ | Used on signup                         |
-| `MAIL_USER` / `MAIL_PASS`                                        |       ✅ | Gmail App Password flow                |
-| `OAUTH_CLIENTID` / `OAUTH_CLIENT_SECRET` / `OAUTH_REFRESH_TOKEN` |       ❌ | Optional OAuth2 email sending          |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL`                           |       ❌ | **Recommended** transactional email (Resend); use `onboarding@resend.dev` locally |
+| `MAIL_TRANSPORT`                                                   |       ❌ | Set to `console` to log OTPs without sending (local/tests) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS`          |       ❌ | Generic SMTP fallback                  |
+| `MAIL_USER` / `MAIL_PASS`                                        |       ❌ | Gmail App Password fallback            |
+| `OAUTH_CLIENTID` / `OAUTH_CLIENT_SECRET` / `OAUTH_REFRESH_TOKEN` |       ❌ | Gmail OAuth2 fallback                  |
 | `REDIS_URL`                                                      |       ❌ | Upstash URL supported (`rediss://...`) |
 | `REDIS_CACHE_TTL_SECONDS`                                        |       ❌ | Default `30`                           |
 
@@ -128,6 +131,23 @@ cd server
 npm ci
 ```
 
-Backend tests are not included yet because the backend does not currently have a
-test script. Once backend tests are added, the CI workflow can be extended to run
-`npm test` inside `server/`.
+Backend auth checks (including signup/verify with console mail transport):
+
+```bash
+cd server
+npm run test:auth
+```
+
+### Email / OTP configuration
+
+OTP emails are sent through `server/services/email.js`. Configure **one** provider; the server picks the first match in this order:
+
+1. `MAIL_TRANSPORT=console` — logs the OTP to the server console (no delivery). Used by `npm run test:auth`.
+2. `RESEND_API_KEY` — [Resend](https://resend.com) (preferred for production). Set `RESEND_FROM_EMAIL` to a verified sender (e.g. `PiperChat <onboarding@resend.dev>` for sandbox). Until you verify a domain, Resend only delivers to the email address on your Resend account.
+3. `SMTP_HOST` + credentials — any SMTP relay.
+4. `MAIL_USER` + `MAIL_PASS` — Gmail app password.
+5. `OAUTH_*` — Gmail OAuth2.
+
+If nothing is configured, signup and resend still work but responses include `email_sent: false`.
+
+Backend tests are not included in CI yet beyond dependency install. Run `npm run test:auth` locally before changing auth or email behavior.

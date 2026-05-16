@@ -51,10 +51,30 @@ export function signup(email, username, password, dob) {
   })();
 }
 
+function dispatchVerificationEmail(otp, email, username, context) {
+  sendMail(otp, email, username)
+    .then((mailResult) => {
+      if (!mailResult.ok) {
+        console.warn(`[auth/${context}] Verification email not sent:`, {
+          email,
+          reason: mailResult.reason,
+          provider: mailResult.provider,
+          error: mailResult.error?.message,
+        });
+      }
+    })
+    .catch((err) => {
+      console.error(
+        `[auth/${context}] sendMail error:`,
+        err?.message || err
+      );
+    });
+}
+
 export async function updatingCreds(accountCreds, otp, email, username) {
   await User.updateOne({ email }, accountCreds);
-  const mailResult = await sendMail(otp, email, username);
-  return { message: "updated", status: 201, mailResult };
+  dispatchVerificationEmail(otp, email, username, "updatingCreds");
+  return { message: "updated", status: 201, mailResult: { ok: null } };
 }
 
 export function generateTag(countValue) {

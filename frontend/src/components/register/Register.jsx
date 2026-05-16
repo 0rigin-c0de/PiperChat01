@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { postJson } from "../../lib/api.js";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -244,12 +245,13 @@ function Register() {
       try {
         setSubmitting(true);
         setalert_box(false);
-        const res = await fetch(`${url}/signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, username, dob }),
+        const { data } = await postJson(url, "/signup", {
+          email,
+          password,
+          username,
+          dob,
         });
-        const data = await res.json();
+
         if (data.status === 201) {
           if (data.email_sent === false) {
             setotp_alert_message(
@@ -268,12 +270,15 @@ function Register() {
         } else if (data.status === 400) {
           setalert_message("Password must be at least 7 characters long.");
           setalert_box(true);
+        } else if (data.status === 500) {
+          setalert_message("Server error. Please try again in a moment.");
+          setalert_box(true);
         } else {
           setalert_message("Registration failed. Please try again.");
           setalert_box(true);
         }
-      } catch {
-        setalert_message("Network error. Please try again.");
+      } catch (err) {
+        setalert_message(err?.message || "Network error. Please try again.");
         setalert_box(true);
       } finally {
         setSubmitting(false);
@@ -287,12 +292,10 @@ function Register() {
     try {
       setVerifying(true);
       setotp_alert_box(false);
-      const res = await fetch(`${url}/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp_value: otp_value.trim(), email: user_values.email }),
+      const { data } = await postJson(url, "/verify", {
+        otp_value: otp_value.trim(),
+        email: user_values.email,
       });
-      const data = await res.json();
       if (data.status === 201) {
         setModalShow(false);
         setotp_value("");
@@ -311,8 +314,8 @@ function Register() {
         setotp_alert_message("Verification failed. Please try again.");
         setotp_alert_box(true);
       }
-    } catch {
-      setotp_alert_message("Network error. Please try again.");
+    } catch (err) {
+      setotp_alert_message(err?.message || "Network error. Please try again.");
       setotp_alert_box(true);
     } finally {
       setVerifying(false);
@@ -323,12 +326,9 @@ function Register() {
     if (!url) return;
     try {
       setVerifying(true);
-      const res = await fetch(`${url}/resend_otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user_values.email }),
+      const { data } = await postJson(url, "/resend_otp", {
+        email: user_values.email,
       });
-      const data = await res.json();
       if (data.status === 201) {
         setotp_alert_message(
           data.email_sent === false
@@ -339,8 +339,8 @@ function Register() {
         setotp_alert_message("Could not resend code. Please try again.");
       }
       setotp_alert_box(true);
-    } catch {
-      setotp_alert_message("Network error. Please try again.");
+    } catch (err) {
+      setotp_alert_message(err?.message || "Network error. Please try again.");
       setotp_alert_box(true);
     } finally {
       setVerifying(false);

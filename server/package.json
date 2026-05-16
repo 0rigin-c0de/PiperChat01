@@ -8,7 +8,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test:auth:unit": "node scripts/run-auth-jwt-unit.mjs",
-    "test:auth": "node scripts/run-auth-integration.mjs"
+    "test:auth": "node scripts/run-auth-integration.mjs",
+    "verify:resend": "node scripts/verify-resend-integration.mjs"
   },
   "author": "shunnu",
   "license": "ISC",
@@ -23,6 +24,7 @@
     "nodemailer": "^8.0.3",
     "nodemon": "^3.1.14",
     "redis": "^5.11.0",
+    "resend": "^6.12.3",
     "shortid": "^2.2.16",
     "socket.io": "^4.5.4"
   },

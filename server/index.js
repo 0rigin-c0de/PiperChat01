@@ -18,7 +18,27 @@ import { setIO } from "./socket/runtime.js";
 const port = process.env.PORT || 2000;
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (
+  process.env.FRONTEND_ORIGINS ||
+  "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173"
+)
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS blocked origin: ${origin}`));
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "x-auth-token"],
+  })
+);
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
@@ -37,20 +57,42 @@ app.use("/", directMessageRoutes);
 app.use("/", notificationRoutes);
 app.use("/", profileRoutes);
 
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+
+  if (err?.type === "entity.parse.failed") {
+    return res.status(400).json({
+      ok: false,
+      message: "Invalid JSON body",
+      status: 400,
+    });
+  }
+
+  if (err?.message?.startsWith("CORS blocked origin")) {
+    return res.status(403).json({
+      ok: false,
+      message: err.message,
+      status: 403,
+    });
+  }
+
+  console.error("[server] Unhandled error:", err?.message || err);
+  return res.status(500).json({
+    ok: false,
+    message: "Server error",
+    status: 500,
+  });
+});
+
 async function start() {
   await connect();
   const server = app.listen(port, () => {
     console.log(`listening on port ${port}`);
     console.log("Connected to DB");
   });
-
-  const allowedOrigins = (
-    process.env.FRONTEND_ORIGINS ||
-    "http://localhost:3000,http://localhost:5173"
-  )
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
 
   const io = new SocketIOServer(server, {
     pingTimeout: 20000,
