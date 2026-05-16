@@ -7,7 +7,7 @@ const Auth = () => {
   const [auth_check, setauth_check] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem("token"));
 
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
 
   const private_routes = useCallback(async () => {
     if (!url || !token) {

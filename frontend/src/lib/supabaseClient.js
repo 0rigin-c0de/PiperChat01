@@ -16,5 +16,5 @@ export const supabase = isValidConfig(supabaseUrl, supabaseAnonKey)
     null);
 
 export function getSupabaseBucket() {
-  return import.meta.env.REACT_APP_SUPABASE_BUCKET || "server-icons";
+  return import.meta.env.VITE_SUPABASE_BUCKET || "server-icons";
 }

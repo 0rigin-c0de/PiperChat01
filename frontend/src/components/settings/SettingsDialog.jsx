@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Camera, Save, Upload } from "lucide-react";
 
 import { API_BASE_URL } from "../../config";
-import { resolveProfilePic } from "../../shared/imageFallbacks";
+import { resolveProfilePic, handleImageError } from "../../shared/imageFallbacks";
 import { change_tag, change_username, option_profile_pic } from "../../store/userCredsSlice";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
@@ -154,6 +154,7 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                 src={effectivePreview}
                 alt=""
                 className="h-full w-full object-cover"
+                onError={handleImageError}
               />
             </div>
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-extrabold tracking-wider text-white/75 transition hover:bg-white/10">
