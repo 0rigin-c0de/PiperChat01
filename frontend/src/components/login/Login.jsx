@@ -109,7 +109,7 @@ function Login() {
   const [alert_box, setalert_box] = useState(false);
   const [alert_message, setalert_message] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
 
   const canSubmit = useMemo(
     () => user_values.email.trim().length > 0 && user_values.password.length > 0,
@@ -124,7 +124,7 @@ function Login() {
     e.preventDefault();
     const { email, password } = user_values;
     if (!url) {
-      setalert_message("Missing REACT_APP_URL. Check frontend/.env.");
+      setalert_message("Missing VITE_URL. Check frontend/.env.");
       setalert_box(true);
       return;
     }

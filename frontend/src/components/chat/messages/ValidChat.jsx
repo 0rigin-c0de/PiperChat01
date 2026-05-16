@@ -10,7 +10,7 @@ import { resolveProfilePic, handleImageError } from "../../../shared/imageFallba
 
 function ValidChat() {
   const dispatch = useDispatch();
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
   const { server_id } = useParams();
 
   // channel creds from redux
