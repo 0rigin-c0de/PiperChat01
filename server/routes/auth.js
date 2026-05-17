@@ -5,6 +5,7 @@ import { OTP_TTL_MS } from "../config/constants.js";
 import { authToken } from "../middleware/auth.js";
 import User from "../models/User.js";
 import { generateOTP, sendMail } from "../services/email.js";
+import { generateDicebearAvatar } from "../lib/avatar.js";
 import {
   isUsernameAvailable,
   signup,
@@ -38,10 +39,11 @@ router.post("/signup", async (req, res) => {
     const usernameResponse = await isUsernameAvailable(username);
     const finalTag = usernameResponse.final_tag;
 
+    const avatarSeed = `${username}-${finalTag}`;
     const newUser = new User({
       username,
       tag: finalTag,
-      profile_pic: process.env.default_profile_pic,
+      profile_pic: generateDicebearAvatar(avatarSeed),
       email,
       password,
       dob,
