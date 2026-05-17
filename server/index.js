@@ -1,3 +1,4 @@
+import http from "http";
 import "./config/env.js";
 import cors from "cors";
 import express from "express";
@@ -89,19 +90,25 @@ app.use((err, req, res, next) => {
 
 async function start() {
   await connect();
-  const server = app.listen(port, () => {
-    console.log(`listening on port ${port}`);
-    console.log("Connected to DB");
-  });
+
+  const server = http.createServer(app);
 
   const io = new SocketIOServer(server, {
     pingTimeout: 20000,
     cors: {
       origin: allowedOrigins,
+      methods: ["GET", "POST"],
+      credentials: true,
     },
   });
+
   setIO(io);
   attachSocketHandlers(io);
+
+  server.listen(port, () => {
+    console.log(`listening on port ${port}`);
+    console.log("Connected to DB");
+  });
 }
 
 start().catch((err) => {

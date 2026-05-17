@@ -73,6 +73,8 @@ router.post("/verify_route", authToken, (req, res) => {
 
 router.post("/signup", async (req, res) => {
   const startedAt = Date.now();
+  const reqId = Math.random().toString(36).slice(2, 10);
+  console.log(`[auth/signup][${reqId}] → received request`);
   try {
     const { email, username, password, dob } = req.body ?? {};
     const authorized = false;
@@ -114,6 +116,7 @@ router.post("/signup", async (req, res) => {
 
       try {
         await newUser.save();
+        console.log(`[auth/signup][${reqId}] user saved successfully`);
       } catch (err) {
         console.error("[auth/signup] Failed to save user:", err?.message || err);
         return signupJson(res, 500, {
@@ -123,6 +126,7 @@ router.post("/signup", async (req, res) => {
         });
       }
 
+      console.log(`[auth/signup][${reqId}] starting background email send`);
       sendVerificationEmailAsync(otp, email, username, "signup");
 
       return signupJson(res, 201, {
@@ -221,9 +225,7 @@ router.post("/signup", async (req, res) => {
       });
     }
   } finally {
-    if (process.env.SIGNUP_DEBUG === "true") {
-      console.info(`[auth/signup] completed in ${Date.now() - startedAt}ms`);
-    }
+    console.info(`[auth/signup][${reqId}] completed in ${Date.now() - startedAt}ms`);
   }
 });
 

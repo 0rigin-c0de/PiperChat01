@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
+import { postJson } from "../../lib/api.js";
 
 
 function Label({ children }) {
@@ -131,12 +132,7 @@ function Login() {
     try {
       setSubmitting(true);
       setalert_box(false);
-      const res = await fetch(`${url}/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+      const { data } = await postJson(url, "/signin", { email, password });
       if (data.status === 442) {
         setalert_message("Invalid email or password.");
         setalert_box(true);
@@ -152,8 +148,8 @@ function Login() {
         setalert_message("Login failed. Please try again.");
         setalert_box(true);
       }
-    } catch {
-      setalert_message("Network error. Please try again.");
+    } catch (err) {
+      setalert_message(err?.message || "Network error. Please try again.");
       setalert_box(true);
     } finally {
       setSubmitting(false);

@@ -23,7 +23,8 @@ export async function postJson(baseUrl, path, body, options = {}) {
     if (text) {
       try {
         data = JSON.parse(text);
-      } catch {
+      } catch (parseErr) {
+        console.error(`[api] JSON parse failed for ${url}:`, text, parseErr);
         const preview = text.replace(/\s+/g, " ").slice(0, 120);
         throw new Error(
           `Server returned non-JSON (${res.status}): ${preview || "(empty)"}`
