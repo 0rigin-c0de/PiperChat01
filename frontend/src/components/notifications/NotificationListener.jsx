@@ -19,9 +19,15 @@ function NotificationListener() {
   const dispatch = useDispatch();
   const location = useLocation();
   const userId = useSelector((state) => state.user_info.id);
+  const notificationPrefs = useSelector((state) => state.user_info.notification_preferences);
   const activeFriend = useSelector((state) => state.direct_message.activeFriend);
   const activeChannelId = useSelector((state) => state.currentPage.page_id);
   const url = import.meta.env.VITE_URL;
+
+  const canReceiveDMs = notificationPrefs?.direct_messages ?? true;
+  const canReceiveServerMessages = notificationPrefs?.server_messages ?? true;
+  const canReceiveFriendRequests = notificationPrefs?.friend_requests ?? true;
+  const canReceiveServerInvites = notificationPrefs?.server_invites ?? true;
 
   const pathParts = location.pathname.split("/");
   const activeServerId = pathParts[2];
@@ -91,6 +97,8 @@ function NotificationListener() {
         return;
       }
 
+      if (!canReceiveDMs) return;
+
       dispatch(increment_dm_unread({ friend_id }));
     };
 
@@ -112,17 +120,34 @@ function NotificationListener() {
         return;
       }
 
+      if (!canReceiveServerMessages) return;
+
       dispatch(increment_server_unread({ server_id, channel_id }));
     };
 
     socket.on("direct_message_notification", handleDmNotification);
     socket.on("server_message_notification", handleServerNotification);
 
+    const handleFriendRequestNotification = () => {
+      if (!canReceiveFriendRequests) return;
+      dispatch(update_options());
+    };
+
+    const handleServerInviteNotification = () => {
+      if (!canReceiveServerInvites) return;
+      dispatch(update_options());
+    };
+
+    socket.on("friend_request_notification", handleFriendRequestNotification);
+    socket.on("server_invite_notification", handleServerInviteNotification);
+
     return () => {
       socket.off("direct_message_notification", handleDmNotification);
       socket.off("server_message_notification", handleServerNotification);
+      socket.off("friend_request_notification", handleFriendRequestNotification);
+      socket.off("server_invite_notification", handleServerInviteNotification);
     };
-  }, [activeFriend, activeServerId, activeChannelId, isDashboard, url, dispatch]);
+  }, [activeFriend, activeServerId, activeChannelId, isDashboard, canReceiveDMs, canReceiveServerMessages, canReceiveFriendRequests, canReceiveServerInvites, url, dispatch]);
 
   return null;
 }
