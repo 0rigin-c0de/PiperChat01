@@ -27,6 +27,13 @@ export const verifyServerRole = async (req, res, next) => {
       .status(500)
       .json({ status: 500, message: "server error during membership check" });
   }
+
+  if (!membership) {
+    return res.status(403).json({
+      status: 403,
+      message: "You are not a member in this server",
+    });
+  }
   //check role
   if (!["owner", "admin"].includes(membership.server_role)) {
     return res.status(403).json({
