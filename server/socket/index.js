@@ -1,4 +1,17 @@
+import User from "../models/User.js";
+
 const onlineUsers = new Map();
+
+async function shouldSendNotification(userId, preferenceKey) {
+  try {
+    const user = await User.findById(userId).lean();
+    if (!user) return false;
+    const prefs = user.notification_preferences || {};
+    return prefs[preferenceKey] !== false;
+  } catch {
+    return true;
+  }
+}
 
 function emitPresenceSnapshot(socket) {
   socket.emit("presence_snapshot", {
@@ -77,13 +90,16 @@ function attachSocketHandlers(io) {
 
     socket.on(
       "send_req",
-      (receiver_id, sender_id, sender_profile_pic, sender_name) => {
-        socket.to(receiver_id).emit("recieve_req", {
-          sender_name: sender_name,
-          sender_profile_pic: sender_profile_pic,
-          sender_id,
-        });
-      }
+      async (receiver_id, sender_id, sender_profile_pic, sender_name) => {
+        const shouldNotify = await shouldSendNotification(receiver_id, "friend_requests");
+        if (shouldNotify) {
+          socket.to(receiver_id).emit("recieve_req", {
+            sender_name: sender_name,
+            sender_profile_pic: sender_profile_pic,
+            sender_id,
+          });
+        }
+      },
     );
 
     socket.on(
@@ -94,15 +110,39 @@ function attachSocketHandlers(io) {
           friend_name: friend_name,
           friend_profile_pic: friend_profile_pic,
         });
-      }
+      },
     );
 
     socket.on("req_removed", (receiver_id) => {
       socket.to(receiver_id).emit("request_updated");
     });
 
-    socket.on("join_chat", (channel_id) => {
-      socket.join(channel_id);
+    socket.on("join_chat", (data) => {
+      const channel_id = typeof data === "object" ? data.channel_id : data;
+      const normalizedChannelId = String(channel_id || "");
+
+      // console.log("Socket room report...debug");
+      // console.log("Current rooms:", socket.rooms);
+
+      if (!normalizedChannelId) {
+        return;
+      }
+
+      //now we are checking if a user is already there in another channel
+      if (
+        socket.data.active_channel_id &&
+        socket.data.active_channel_id !== normalizedChannelId
+      ) {
+        socket.leave(socket.data.active_channel_id);
+        socket.leave(`channel:${socket.data.active_channel_id}`);
+        // console.log(
+        //   `Socket ${socket.id} left the channel: ${socket.data.active_channel_id}`,
+        // );
+      }
+
+      socket.data.active_channel_id = normalizedChannelId;
+      socket.join(`channel:${normalizedChannelId}`);
+      // console.log("Now in thr room:", `channel:${normalizedChannelId}`);
     });
 
     socket.on("join_server", (server_id) => {
@@ -125,7 +165,7 @@ function attachSocketHandlers(io) {
     socket.on(
       "send_message",
       (channel_id, message, timestamp, sender_name, sender_tag, sender_pic) => {
-        socket.to(channel_id).emit("recieve_message", {
+        socket.to(`channel:${channel_id}`).emit("recieve_message", {
           message_data: {
             message,
             timestamp,
@@ -134,7 +174,7 @@ function attachSocketHandlers(io) {
             sender_pic,
           },
         });
-      }
+      },
     );
 
     socket.on("disconnect", () => {
