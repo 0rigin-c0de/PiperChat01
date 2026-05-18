@@ -150,16 +150,15 @@ function Dashboard() {
         dispatch(option_profile_pic(resolveProfilePic(profile_pic, username)));
         dispatch(option_user_id(id));
         
-        let prefs = notification_preferences;
-        if (!prefs) {
-          const stored = localStorage.getItem("notification_preferences");
-          if (stored) {
-            prefs = JSON.parse(stored);
-          }
-        }
-        if (prefs) {
-          dispatch(set_notification_preferences(prefs));
-        }
+        dispatch(
+          set_notification_preferences({
+            direct_messages: true,
+            friend_requests: true,
+            server_messages: true,
+            server_invites: true,
+            ...notification_preferences,
+          }),
+        );
       } catch (err) {
         console.error("Failed to decode token", err);
       }
