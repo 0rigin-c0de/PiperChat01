@@ -1,12 +1,11 @@
+import config from "../config/index.js";
 import { createClient } from "redis";
 
 const redisUrl =
-  process.env.REDIS_URL ||
-  process.env.UPSTASH_REDIS_URL ||
-  process.env.UPSTASH_REDIS_TLS_URL ||
+  config.REDIS_URL ||
+  config.UPSTASH_REDIS_URL ||
+  config.UPSTASH_REDIS_TLS_URL ||
   "";
-
-const defaultTtlSeconds = Number(process.env.REDIS_CACHE_TTL_SECONDS || 30);
 
 let redisConnectPromise = null;
 
@@ -45,7 +44,7 @@ async function getJson(key) {
   }
 }
 
-async function setJson(key, value, ttlSeconds = defaultTtlSeconds) {
+async function setJson(key, value, ttlSeconds = config.REDIS_CACHE_TTL_SECONDS) {
   const client = await getRedis();
   if (!client) return false;
 

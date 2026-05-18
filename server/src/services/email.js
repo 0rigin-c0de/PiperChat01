@@ -1,3 +1,5 @@
+import config from "../config/index.js";
+
 import nodemailer from "nodemailer";
 import {
   getMailUser,
@@ -15,14 +17,14 @@ const MAIL_MODES = {
 };
 
 function hasSmtpCredentials() {
-  const smtpHost = process.env.SMTP_HOST?.trim();
-  const smtpUser = (process.env.SMTP_USER || getMailUser()).trim();
-  const smtpPass = (process.env.SMTP_PASS || process.env.MAIL_PASS || "").trim();
+  const smtpHost = config.SMTP_HOST?.trim();
+  const smtpUser = (config.SMTP_USER || getMailUser()).trim();
+  const smtpPass = (config.SMTP_PASS || config.MAIL_PASS || "").trim();
   return Boolean(smtpHost && smtpUser && smtpPass);
 }
 
 function hasPasswordCredentials() {
-  return Boolean(getMailUser() && process.env.MAIL_PASS?.trim());
+  return Boolean(getMailUser() && config.MAIL_PASS?.trim());
 }
 
 /**
@@ -30,7 +32,7 @@ function hasPasswordCredentials() {
  * Nodemailer still uses SMTP and may ETIMEDOUT on cloud hosts that block outbound SMTP.
  */
 export function resolveMailMode() {
-  const requested = (process.env.MAIL_TRANSPORT || "auto").trim().toLowerCase();
+  const requested = (config.MAIL_TRANSPORT || "auto").trim().toLowerCase();
 
   if (requested === "console") return MAIL_MODES.CONSOLE;
 
@@ -61,24 +63,24 @@ function createNodemailerTransporter(mode) {
   if (mode === MAIL_MODES.PASSWORD) {
     return nodemailer.createTransport({
       service: "gmail",
-      auth: { user: getMailUser(), pass: process.env.MAIL_PASS.trim() },
+      auth: { user: getMailUser(), pass: config.MAIL_PASS.trim() },
     });
   }
 
   if (mode === MAIL_MODES.SMTP) {
-    const smtpPort = process.env.SMTP_PORT
-      ? Number(process.env.SMTP_PORT)
+    const smtpPort = config.SMTP_PORT
+      ? Number(config.SMTP_PORT)
       : undefined;
     return nodemailer.createTransport({
-      host: process.env.SMTP_HOST.trim(),
+      host: config.SMTP_HOST.trim(),
       port: smtpPort || 587,
       secure:
-        process.env.SMTP_SECURE === "true" ||
-        process.env.SMTP_SECURE === "1" ||
+        config.SMTP_SECURE === "true" ||
+        config.SMTP_SECURE === "1" ||
         smtpPort === 465,
       auth: {
-        user: (process.env.SMTP_USER || getMailUser()).trim(),
-        pass: (process.env.SMTP_PASS || process.env.MAIL_PASS).trim(),
+        user: (config.SMTP_USER || getMailUser()).trim(),
+        pass: (config.SMTP_PASS || config.MAIL_PASS).trim(),
       },
     });
   }

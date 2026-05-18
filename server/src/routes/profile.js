@@ -1,3 +1,5 @@
+import config from "../config/index.js";
+
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -154,7 +156,7 @@ router.patch("/profile", authToken, async (req, res) => {
 
     const token = jwt.sign(
       buildAuthUserJwtPayload(updated),
-      process.env.ACCESS_TOKEN
+      config.ACCESS_TOKEN
     );
 
     return res.status(200).json({
@@ -252,7 +254,7 @@ router.patch("/profile/notifications", authToken, async (req, res) => {
 
     const token = jwt.sign(
       buildAuthUserJwtPayload(updated),
-      process.env.ACCESS_TOKEN,
+      config.ACCESS_TOKEN,
     );
 
     return res.status(200).json({

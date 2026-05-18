@@ -1,3 +1,5 @@
+import config from "../config/index.js";
+
 import express from "express";
 import jwt from "jsonwebtoken";
 
@@ -24,7 +26,7 @@ router.post("/add_friend", async (req, res) => {
   try {
     user_id = jwt.verify(
       req.headers["x-auth-token"],
-      process.env.ACCESS_TOKEN
+      config.ACCESS_TOKEN
     );
   } catch (e) {
     return res.status(401).json({ message: "Unauthorized", status: 401 });
@@ -143,7 +145,7 @@ router.get("/user_relations", async (req, res) => {
   try {
     const user_id = jwt.verify(
       req.headers["x-auth-token"],
-      process.env.ACCESS_TOKEN
+      config.ACCESS_TOKEN
     );
     const result = await User.findOne({ _id: user_id.id }).lean();
     if (!result) {
@@ -170,7 +172,7 @@ router.post("/process_req", async (req, res) => {
     try {
       user_id = jwt.verify(
         req.headers["x-auth-token"],
-        process.env.ACCESS_TOKEN
+        config.ACCESS_TOKEN
       );
     } catch (e) {
       return res.status(401).json({ message: "Unauthorized", status: 401 });

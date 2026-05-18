@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test:auth:unit": "node scripts/run-auth-jwt-unit.mjs",
     "test:auth": "node scripts/run-auth-integration.mjs",
     "gmail:oauth-setup": "node scripts/gmail-oauth-setup.mjs"

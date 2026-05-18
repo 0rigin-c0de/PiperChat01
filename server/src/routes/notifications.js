@@ -1,3 +1,5 @@
+import config from "../config/index.js";
+
 import express from "express";
 import jwt from "jsonwebtoken";
 
@@ -12,7 +14,7 @@ import {
 const router = express.Router();
 
 function getAuthorizedUser(req) {
-  return jwt.verify(req.headers["x-auth-token"], process.env.ACCESS_TOKEN);
+  return jwt.verify(req.headers["x-auth-token"], config.ACCESS_TOKEN);
 }
 
 router.get("/unread_summary", authToken, async (req, res) => {

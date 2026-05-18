@@ -1,16 +1,15 @@
-import "./env.js";
+import config from "./index.js";
 import mongoose from "mongoose";
 
 mongoose.set("strictQuery", true);
 
-const mongoUri = process.env.MONGO_URI;
-if (!mongoUri) {
+if (!config.MONGO_URI) {
   throw new Error("MONGO_URI is not set in .env");
 }
 
 export function connect(options = {}) {
   return mongoose
-    .connect(mongoUri, {
+    .connect(config.MONGO_URI, {
       serverSelectionTimeoutMS: 8000,
       ...options,
     })

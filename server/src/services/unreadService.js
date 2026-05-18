@@ -1,3 +1,5 @@
+import config from "../config/index.js";
+
 let createClient = null;
 
 try {
@@ -10,13 +12,13 @@ const memoryStore = new Map();
 let redisClientPromise = null;
 
 function getRedisUrl() {
-  if (process.env.REDIS_URL) {
-    return process.env.REDIS_URL;
+  if (config.REDIS_URL) {
+    return config.REDIS_URL;
   }
 
-  if (process.env.REDIS_HOST) {
-    const port = process.env.REDIS_PORT || "6379";
-    return `redis://${process.env.REDIS_HOST}:${port}`;
+  if (config.REDIS_HOST) {
+    const port = config.REDIS_PORT || "6379";
+    return `redis://${config.REDIS_HOST}:${port}`;
   }
 
   return null;

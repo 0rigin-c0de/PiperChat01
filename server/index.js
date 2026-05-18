@@ -1,27 +1,27 @@
-import "./config/env.js";
+import "dotenv/config"
+import config from "./src/config/index.js"
 
 import app from "./server.js";
 import { Server as SocketIOServer } from "socket.io";
-import { connect } from "./config/db.js";
-import { attachSocketHandlers } from "./socket/index.js";
-import { setIO } from "./socket/runtime.js";
-import { verifyMailTransport } from "./services/email.js";
+import { connect } from "./src/config/db.js";
+import { attachSocketHandlers } from "./src/socket/index.js";
+import { setIO } from "./src/socket/runtime.js";
+import { verifyMailTransport } from "./src/services/email.js";
 
 let server;
-const PORT = process.env.PORT || 2000;
 
 (async function startServer() {
   try {
     await connect();
     await verifyMailTransport();
 
-    server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    server = app.listen(config.PORT, () => {
+      console.log(`Server running on port ${config.PORT}`);
       console.log("Database connected successfully");
     });
 
     const allowedOrigins = (
-      process.env.FRONTEND_ORIGINS ||
+      config.FRONTEND_ORIGINS ||
       "http://localhost:3000,http://localhost:5173"
     )
       .split(",")
@@ -38,7 +38,7 @@ const PORT = process.env.PORT || 2000;
     attachSocketHandlers(io);
   } catch (error) {
     console.error("Failed to start server", error);
-    if (process.env.NODE_ENV === "production") process.exit(1);
+    if (config.NODE_ENV === "production") process.exit(1);
   }
 })();
 
