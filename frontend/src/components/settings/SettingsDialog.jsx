@@ -51,41 +51,19 @@ function NotificationToggle({ label, description, checked, onChange, icon: Icon 
   );
 }
 
-function Message({ type, children }) {
-  if (!children) return null;
-
-  const styles = {
-    error: "border-red-500/30 bg-red-500/10 text-red-300",
-    success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  };
-
-  const icons = {
-    error: AlertCircle,
-    success: CheckCircle2,
-  };
-
-  const Icon = icons[type];
-
-  return (
-    <div className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium ${styles[type]}`}>
-      <Icon className="h-4 w-4" />
-      {children}
-    </div>
-  );
-}
-
 function TabButton({ icon: Icon, label, active, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-t-lg px-3 py-2 text-xs font-semibold transition-all duration-200 border-b-2 ${
+      className={`flex items-center gap-2 rounded-t-lg px-3 py-2 text-xs font-semibold transition-all duration-200 border-b-2 border-transparent ${
         active
-          ? "bg-white/5 text-white border-violet-500"
-          : "text-white/40 border-transparent hover:bg-white/5 hover:text-white/70"
+          ? "bg-white/5 text-white"
+          : "text-white/40 hover:bg-white/5 hover:text-white/70"
       }`}
+      style={active ? { borderImage: "linear-gradient(90deg, #8b5cf6, #22d3d1) 1" } : undefined}
     >
-      <Icon className={`h-3.5 w-3.5 ${active ? "text-violet-400" : "text-white/30"}`} />
+      <Icon className={`h-3.5 w-3.5 ${active ? "text-white/70" : "text-white/30"}`} />
       {label}
     </button>
   );
@@ -134,7 +112,21 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
     if (open && user.username) {
       setDisplayName(user.username);
     }
-  }, [open, user.username]);
+    if (open) {
+      setActiveTab("user");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+      setPasswordSuccess("");
+      setNotifDirectMessages(user.notification_preferences?.direct_messages ?? true);
+      setNotifFriendRequests(user.notification_preferences?.friend_requests ?? true);
+      setNotifServerMessages(user.notification_preferences?.server_messages ?? true);
+      setNotifServerInvites(user.notification_preferences?.server_invites ?? true);
+      setNotifSuccess("");
+      setError("");
+    }
+  }, [open, user.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reset = () => {
     setDisplayName(user.username || "");
@@ -255,6 +247,11 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
       return;
     }
 
+    if (currentPassword === newPassword) {
+      setPasswordError("New password must be different from current password.");
+      return;
+    }
+
     setChangingPassword(true);
     try {
       const res = await fetch(`${API_BASE_URL}/profile/password`, {
@@ -279,7 +276,13 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setChangingPassword(false);
+      setTimeout(() => {
+        setChangingPassword(false);
+        setTimeout(() => {
+          setOpen(false);
+          reset();
+        }, 1000);
+      }, 800);
     } catch {
       setPasswordError("Failed to change password.");
       setChangingPassword(false);
@@ -309,12 +312,20 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
         setError(data.message || "Failed to save notification preferences.");
       } else {
         dispatch(set_notification_preferences(data.notification_preferences));
+        localStorage.setItem("notification_preferences", JSON.stringify(data.notification_preferences));
         setNotifSuccess("Notification settings saved!");
+        setTimeout(() => {
+          setSavingNotifications(false);
+          setTimeout(() => {
+            setOpen(false);
+            reset();
+          }, 1000);
+        }, 800);
       }
     } catch {
       setError("Failed to save notification preferences.");
+      setSavingNotifications(false);
     }
-    setSavingNotifications(false);
   };
 
   return (
@@ -322,7 +333,9 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
-        if (nextOpen) reset();
+        if (nextOpen) {
+          reset();
+        }
       }}
     >
       <button
@@ -415,10 +428,6 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                       />
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <Message type="error">{error}</Message>
-                    <Message type="success">{success}</Message>
-                  </div>
                 </div>
               )}
 
@@ -434,6 +443,7 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                       <label className="text-xs font-bold uppercase tracking-widest text-white/40">Current Password</label>
                       <Input
                         type="password"
+                        autoComplete="current-password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="••••••••"
@@ -445,6 +455,7 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                         <label className="text-xs font-bold uppercase tracking-widest text-white/40">New Password</label>
                         <Input
                           type="password"
+                          autoComplete="new-password"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Min. 6 characters"
@@ -455,6 +466,7 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                         <label className="text-xs font-bold uppercase tracking-widest text-white/40">Confirm New Password</label>
                         <Input
                           type="password"
+                          autoComplete="new-password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Confirm new password"
@@ -463,8 +475,6 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                       </div>
                     </div>
                   </div>
-                  <Message type="error">{passwordError}</Message>
-                  <Message type="success">{passwordSuccess}</Message>
                 </div>
               )}
 
@@ -505,21 +515,57 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                       onChange={setNotifServerInvites}
                     />
                   </div>
-                  <Message type="success">{notifSuccess}</Message>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end border-t border-white/10 bg-white/[0.02] px-6 py-3">
-              <div className="flex gap-3">
+            <div className="flex items-center justify-between gap-4 border-t border-white/10 bg-white/[0.02] px-6 py-3">
+              <div className="min-w-0 flex-1">
+                {activeTab === "user" && success && (
+                  <div className="flex items-center gap-2 text-sm text-emerald-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {success}
+                  </div>
+                )}
+                {activeTab === "user" && error && (
+                  <div className="flex items-center gap-2 text-sm text-red-400">
+                    <AlertCircle className="h-4 w-4" />
+                    {error}
+                  </div>
+                )}
+                {activeTab === "password" && passwordSuccess && (
+                  <div className="flex items-center gap-2 text-sm text-emerald-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {passwordSuccess}
+                  </div>
+                )}
+                {activeTab === "password" && passwordError && (
+                  <div className="flex items-center gap-2 text-sm text-red-400">
+                    <AlertCircle className="h-4 w-4" />
+                    {passwordError}
+                  </div>
+                )}
+                {activeTab === "notifications" && notifSuccess && (
+                  <div className="flex items-center gap-2 text-sm text-emerald-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {notifSuccess}
+                  </div>
+                )}
+                {activeTab === "notifications" && error && (
+                  <div className="flex items-center gap-2 text-sm text-red-400">
+                    <AlertCircle className="h-4 w-4" />
+                    {error}
+                  </div>
+                )}
+              </div>
+              <div className="flex shrink-0 gap-3">
                 {activeTab === "user" && (
                   <Button
                     onClick={saveProfile}
                     disabled={saving}
-                    className="bg-violet-600 font-bold text-white hover:bg-violet-500"
                   >
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save Profile
                   </Button>
                 )}
@@ -527,9 +573,8 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                   <Button
                     onClick={changePassword}
                     disabled={changingPassword}
-                    className="bg-violet-600 font-bold text-white hover:bg-violet-500"
                   >
-                    {changingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                    {changingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
                     Update Password
                   </Button>
                 )}
@@ -537,9 +582,8 @@ export default function SettingsDialog({ triggerClassName, icon: Icon }) {
                   <Button
                     onClick={saveNotifications}
                     disabled={savingNotifications}
-                    className="bg-violet-600 font-bold text-white hover:bg-violet-500"
                   >
-                    {savingNotifications ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="mr-2 h-4 w-4" />}
+                    {savingNotifications ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
                     Save Preferences
                   </Button>
                 )}
