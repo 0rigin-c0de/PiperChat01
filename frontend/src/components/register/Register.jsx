@@ -190,7 +190,8 @@ function Register() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [verifying, setVerifying] = useState(false);
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const isValidEmail = emailRegex.test(user_values.email.trim());
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
@@ -204,7 +205,8 @@ function Register() {
       user_values.password.length > 0 &&
       user_values.date_value !== "" &&
       user_values.month_value !== "" &&
-      user_values.year_value !== "",
+      user_values.year_value !== "" &&
+      isValidEmail,
     [user_values]
   );
 
@@ -347,6 +349,8 @@ function Register() {
     }
   };
 
+  
+
   return (
     <>
       <AuthShell mode="register">
@@ -391,6 +395,9 @@ function Register() {
                 disabled={submitting || verifying}
                 placeholder="you@example.com"
               />
+              {!isValidEmail && user_values.email && (
+                <span className="text-red-500 text-xs">Please enter a valid email address</span>
+              )}
             </div>
 
             <div>
@@ -403,6 +410,7 @@ function Register() {
                 disabled={submitting || verifying}
                 placeholder="sunil"
               />
+
             </div>
 
             <div>
