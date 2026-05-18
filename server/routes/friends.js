@@ -11,14 +11,22 @@ import {
 const router = express.Router();
 
 router.post("/add_friend", async (req, res) => {
-  const friend = req.body.friend;
+  if (typeof req.body.friend !== "string") {
+    return res.status(400).json({ message: "Invalid Input", status: 400 });
+  }
+
+  const friend = req.body.friend.trim();
   const hashIndex = friend.indexOf("#");
-  if (hashIndex === -1) {
+  if (hashIndex === -1 || hashIndex !== friend.lastIndexOf("#")) {
     return res.status(400).json({ message: "Invalid Input", status: 400 });
   }
 
   const name = friend.slice(0, hashIndex).trim();
-  const userTag = friend.slice(hashIndex + 1);
+  const userTag = friend.slice(hashIndex + 1).trim();
+
+  if (!/^[0-9]{4}$/.test(userTag)) {
+    return res.status(400).json({ message: "Invalid Input", status: 400 });
+  }
 
   let user_id;
   try {
