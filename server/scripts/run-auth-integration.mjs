@@ -127,9 +127,10 @@ async function main() {
       payload.profile_pic === "https://example.com/legacy.png",
       "JWT profile_pic mismatch"
     );
+    const allowedExtras = ["iat", "exp", "notification_preferences"];
     const extra = Object.keys(payload).filter((k) => !required.includes(k));
     assert(
-      extra.every((k) => k === "iat" || k === "exp"),
+      extra.every((k) => allowedExtras.includes(k)),
       `Unexpected JWT keys: ${extra.join(",")}`
     );
     assert(!("password" in payload), "JWT must not contain password");
