@@ -3,12 +3,24 @@ import jwt from "jsonwebtoken";
 
 import Chat from "../models/Chat.js";
 import Server from "../models/Server.js";
+import User from "../models/User.js";
 import * as cache from "../lib/cache.js";
 import { getChats } from "../services/chatService.js";
 import { incrementServerUnread } from "../services/unreadService.js";
 import { getIO } from "../socket/runtime.js";
 
 const router = express.Router();
+
+async function shouldSendNotification(userId, preferenceKey) {
+  try {
+    const user = await User.findById(userId).lean();
+    if (!user) return false;
+    const prefs = user.notification_preferences || {};
+    return prefs[preferenceKey] !== false;
+  } catch {
+    return true;
+  }
+}
 
 function getAuthorizedUser(req, res) {
   try {
@@ -54,15 +66,20 @@ router.post("/store_message", async (req, res) => {
       return;
     }
 
-    const recipients = (server.users || []).filter((user) => user.user_id !== id);
+    const recipients = (server.users || []).filter(
+      (user) => user.user_id !== id,
+    );
     for (const recipient of recipients) {
       await incrementServerUnread(recipient.user_id, server_id, channel_id);
-      io.to(recipient.user_id).emit("server_message_notification", {
-        server_id,
-        channel_id,
-        channel_name,
-        sender_name: username,
-      });
+      const shouldNotify = await shouldSendNotification(recipient.user_id, "server_messages");
+      if (shouldNotify) {
+        io.to(recipient.user_id).emit("server_message_notification", {
+          server_id,
+          channel_id,
+          channel_name,
+          sender_name: username,
+        });
+      }
     }
   }
 
@@ -73,9 +90,7 @@ router.post("/store_message", async (req, res) => {
           {
             channel_id,
             channel_name,
-            chat_details: [
-              chatMessage,
-            ],
+            chat_details: [chatMessage],
           },
         ],
       },
@@ -87,7 +102,10 @@ router.post("/store_message", async (req, res) => {
         await notifyServerRecipients();
         const io = getIO();
         if (io) {
-          io.to(channel_id).emit("server_message_received", chatMessage);
+          io.to(`channel:${channel_id}`).emit(
+            "server_message_received",
+            chatMessage,
+          );
         }
         return res.json({ status: 200, message: chatMessage });
       }
@@ -98,22 +116,23 @@ router.post("/store_message", async (req, res) => {
   } else {
     const pushNewChat = {
       $push: {
-        "channels.$.chat_details": [
-          chatMessage,
-        ],
+        "channels.$.chat_details": [chatMessage],
       },
     };
     try {
       const data = await Chat.updateOne(
         { server_id, "channels.channel_id": channel_id },
-        pushNewChat
+        pushNewChat,
       );
       if (data && data.modifiedCount > 0) {
         await cache.del(`chat:${server_id}:${channel_id}`);
         await notifyServerRecipients();
         const io = getIO();
         if (io) {
-          io.to(channel_id).emit("server_message_received", chatMessage);
+          io.to(`channel:${channel_id}`).emit(
+            "server_message_received",
+            chatMessage,
+          );
         }
         return res.json({ status: 200, message: chatMessage });
       }
@@ -171,18 +190,27 @@ router.post("/edit_server_message", async (req, res) => {
   }
 
   try {
-    const chatDoc = await Chat.findOne({ server_id, "channels.channel_id": channel_id });
+    const chatDoc = await Chat.findOne({
+      server_id,
+      "channels.channel_id": channel_id,
+    });
     if (!chatDoc) {
       return res.status(404).json({ status: 404, message: "Chat not found" });
     }
 
-    const channel = chatDoc.channels.find((entry) => entry.channel_id === channel_id);
+    const channel = chatDoc.channels.find(
+      (entry) => entry.channel_id === channel_id,
+    );
     const message = channel?.chat_details.find(
-      (entry) => String(entry.timestamp) === String(timestamp) && entry.sender_id === senderId
+      (entry) =>
+        String(entry.timestamp) === String(timestamp) &&
+        entry.sender_id === senderId,
     );
 
     if (!message) {
-      return res.status(404).json({ status: 404, message: "Message not found" });
+      return res
+        .status(404)
+        .json({ status: 404, message: "Message not found" });
     }
 
     message.content = content.trim();
@@ -191,7 +219,7 @@ router.post("/edit_server_message", async (req, res) => {
 
     const io = getIO();
     if (io) {
-      io.to(channel_id).emit("server_message_updated", {
+      io.to(`channel:${channel_id}`).emit("server_message_updated", {
         timestamp,
         sender_id: senderId,
         content: message.content,
@@ -218,20 +246,31 @@ router.post("/delete_server_message", async (req, res) => {
   }
 
   try {
-    const chatDoc = await Chat.findOne({ server_id, "channels.channel_id": channel_id });
+    const chatDoc = await Chat.findOne({
+      server_id,
+      "channels.channel_id": channel_id,
+    });
     if (!chatDoc) {
       return res.status(404).json({ status: 404, message: "Chat not found" });
     }
 
-    const channel = chatDoc.channels.find((entry) => entry.channel_id === channel_id);
+    const channel = chatDoc.channels.find(
+      (entry) => entry.channel_id === channel_id,
+    );
     const originalLength = channel?.chat_details.length || 0;
 
     channel.chat_details = channel.chat_details.filter(
-      (entry) => !(String(entry.timestamp) === String(timestamp) && entry.sender_id === senderId)
+      (entry) =>
+        !(
+          String(entry.timestamp) === String(timestamp) &&
+          entry.sender_id === senderId
+        ),
     );
 
     if (channel.chat_details.length === originalLength) {
-      return res.status(404).json({ status: 404, message: "Message not found" });
+      return res
+        .status(404)
+        .json({ status: 404, message: "Message not found" });
     }
 
     await chatDoc.save();
@@ -239,7 +278,7 @@ router.post("/delete_server_message", async (req, res) => {
 
     const io = getIO();
     if (io) {
-      io.to(channel_id).emit("server_message_deleted", {
+      io.to(`channel:${channel_id}`).emit("server_message_deleted", {
         timestamp,
         sender_id: senderId,
       });
