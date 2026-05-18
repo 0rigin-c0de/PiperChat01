@@ -1,12 +1,12 @@
 import "dotenv/config";
-import config from "./src/config/index.js";
+import config from "./config/index.js";
 
 import app from "./server.js";
 import { Server as SocketIOServer } from "socket.io";
-import { connect } from "./src/config/db.js";
-import { attachSocketHandlers } from "./src/socket/index.js";
-import { setIO } from "./src/socket/runtime.js";
-import { verifyMailTransport } from "./src/services/email.js";
+import { connect } from "./config/db.js";
+import { attachSocketHandlers } from "./socket/index.js";
+import { setIO } from "./socket/runtime.js";
+import { verifyMailTransport } from "./services/email.js";
 
 let server;
 
