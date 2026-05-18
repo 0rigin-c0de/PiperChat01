@@ -45,6 +45,18 @@ jobs:
     name: Backend dependency check
     runs-on: ubuntu-latest
 
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "echo 'db.runCommand({ ping: 1 }).ok' | mongosh --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 20s
+
     defaults:
       run:
         working-directory: server
@@ -62,3 +74,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Auth unit checks (JWT / bcrypt shape)
+        run: npm run test:auth:unit
+
+      - name: Auth integration (Mongo + HTTP)
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/piperchat_ci_auth
+          ACCESS_TOKEN: ci-test-jwt-secret-do-not-use-in-production-32chars-min
+          default_profile_pic: https://example.com/default.png
+        run: npm run test:auth

@@ -12,7 +12,7 @@ import { resolveProfilePic, handleImageError } from "../../../shared/imageFallba
 
 function ValidChat() {
   const dispatch = useDispatch();
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
   const { server_id } = useParams();
 
   // channel creds from redux
@@ -36,8 +36,13 @@ function ValidChat() {
   const { scrollContainerRef, autoScroll, handleScroll } = useSmartScroll();
 
   useEffect(() => {
-    socket.emit("join_chat", channel_id);
-  }, [channel_id]);
+    if(socket && channel_id){
+      socket.emit("join_chat", {
+        channel_id: channel_id,
+        server_id: server_id
+      })
+    }
+  }, [channel_id,server_id]);
 
   const sendNow = async () => {
     if (!chat_message.trim()) return;
@@ -230,7 +235,7 @@ function ValidChat() {
         )
       );
     };
-
+    //earlier it was server_message_receive which was wrong
     socket.on("server_message_received", handleReceiveMessage);
     socket.on("server_message_updated", handleUpdatedMessage);
     socket.on("server_message_deleted", handleDeletedMessage);
@@ -278,19 +283,24 @@ function ValidChat() {
           <>
             <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-soft backdrop-blur-xl">
               <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/5">
-                  <Hash className="h-5 w-5 text-brand-300" />
-                </div>
-                <div>
-                  <div className="text-xl font-extrabold tracking-tight text-white">
-                    Welcome to #{channel_name}
-                  </div>
-                  <div className="text-sm text-white/60">
-                    This is the start of the #{channel_name} channel.
-                  </div>
-                </div>
-              </div>
+            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/5">
+              <Hash className="h-5 w-5 text-brand-300" />
             </div>
+            <div className="text-2xl font-extrabold tracking-tight text-white">
+              Welcome to #{channel_name}!
+            </div>
+            <div className="text-white/60">
+              This is the start of the #{channel_name} channel. Send a message to start the conversation!
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-1.5 sm:space-y-2">
+          {(all_messages || []).map((elem) => {
+            const date = new Date(Number(elem.timestamp));
+            const timestamp = `${date.toDateString()}, ${String(
+              date.getHours()
+            ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
             <div className="mt-5 space-y-1.5 sm:space-y-2">
               {(all_messages || []).map((elem) => {
@@ -314,6 +324,27 @@ function ValidChat() {
                         className="h-full w-full object-cover"
                         onError={handleImageError}
                       />
+            return (
+              <div
+                key={`${elem.timestamp}-${elem.sender_id}`}
+                className="group flex gap-2 rounded-2xl px-1 py-1.5 transition hover:bg-white/5 sm:gap-3 sm:px-2 sm:py-2"
+              >
+                <div className="relative mt-4 h-9 w-9 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:mt-3 sm:h-10 sm:w-10">
+                  <img
+                    src={resolveProfilePic(elem.sender_pic, elem.sender_name)}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    onError={handleImageError}
+                  />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+                    <div className="text-sm font-extrabold text-white/85">
+                      {elem.sender_name}
+                    </div>
+                    <div className="text-[10px] leading-none text-white/35">
+                      {timestamp}
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -351,43 +382,44 @@ function ValidChat() {
                         ) : null}
                       </div>
 
-                      {isEditing ? (
-                        <div className="mt-2 flex items-center gap-2">
-                          <Input
-                            value={editingContent}
-                            onChange={(e) => setEditingContent(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && editingContent.trim()) {
-                                editMessage(elem);
-                              }
-                              if (e.key === "Escape") {
-                                setEditingTimestamp(null);
-                                setEditingContent("");
-                              }
-                            }}
-                            autoFocus
-                          />
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => editMessage(elem)}
-                            disabled={!editingContent.trim()}
-                          >
-                            <Save className="h-4 w-4" />
-                            Save
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-[1.45] text-white/85">
-                          {elem.content}
-                        </div>
-                      )}
+                  {isEditing ? (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Input
+                        value={editingContent}
+                        onChange={(e) => setEditingContent(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && editingContent.trim()) {
+                            editMessage(elem);
+                          }
+                          // GSSoC Fix: Close edit mode on Escape key press
+                          if (e.key === "Escape") {
+                            setEditingTimestamp(null);
+                            setEditingContent("");
+                          }
+                        }}
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => editMessage(elem)}
+                        disabled={!editingContent.trim()}
+                      >
+                        <Save className="h-4 w-4" />
+                        Save
+                      </Button>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
+                  ) : (
+                    <div className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-[1.45] text-white/85">
+                      {elem.content}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        </>
         )}
       </div>
 
