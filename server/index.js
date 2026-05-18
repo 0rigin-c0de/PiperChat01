@@ -1,5 +1,5 @@
-import "dotenv/config"
-import config from "./src/config/index.js"
+import "dotenv/config";
+import config from "./src/config/index.js";
 
 import app from "./server.js";
 import { Server as SocketIOServer } from "socket.io";
@@ -20,18 +20,10 @@ let server;
       console.log("Database connected successfully");
     });
 
-    const allowedOrigins = (
-      config.FRONTEND_ORIGINS ||
-      "http://localhost:3000,http://localhost:5173"
-    )
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
-
     const io = new SocketIOServer(server, {
       pingTimeout: 20000,
       cors: {
-        origin: allowedOrigins,
+        origin: config.CORS_WHITELIST,
       },
     });
     setIO(io);

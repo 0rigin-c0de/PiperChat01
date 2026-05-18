@@ -3,6 +3,8 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 
+import corsOptions from "./src/config/cors.js";
+
 import authRoutes from "./src/routes/auth.js";
 import chatRoutes from "./src/routes/chat.js";
 import directMessageRoutes from "./src/routes/directMessages.js";
@@ -14,7 +16,7 @@ import serversRoutes from "./src/routes/servers.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: "10kb" }));

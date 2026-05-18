@@ -27,10 +27,16 @@ const config = {
   REDIS_CACHE_TTL_SECONDS: Number(process.env.REDIS_CACHE_TTL_SECONDS) || 30,
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: process.env.REDIS_PORT,
-  FRONTEND_ORIGINS: process.env.FRONTEND_ORIGINS,
+  CORS_WHITELIST: (
+    process.env.FRONTEND_ORIGINS ||
+    "http://localhost:3000,http://localhost:5173"
+  )
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   OTP_TTL_MS,
   UPSTASH_REDIS_URL: process.env.UPSTASH_REDIS_URL,
-  UPSTASH_REDIS_TLS_URL: process.env.UPSTASH_REDIS_TLS_URL
+  UPSTASH_REDIS_TLS_URL: process.env.UPSTASH_REDIS_TLS_URL,
 };
 
 export default config;
