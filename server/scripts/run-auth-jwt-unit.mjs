@@ -4,7 +4,7 @@
  */
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { buildAuthUserJwtPayload } from "../lib/authJwtPayload.js";
+import { buildAuthUserJwtPayload } from "../src/lib/authJwtPayload.js";
 
 const BCRYPT_RE = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
 

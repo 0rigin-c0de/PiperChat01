@@ -3,14 +3,14 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 
-import authRoutes from "./routes/auth.js";
-import chatRoutes from "./routes/chat.js";
-import directMessageRoutes from "./routes/directMessages.js";
-import friendsRoutes from "./routes/friends.js";
-import invitesRoutes from "./routes/invites.js";
-import notificationRoutes from "./routes/notifications.js";
-import profileRoutes from "./routes/profile.js";
-import serversRoutes from "./routes/servers.js";
+import authRoutes from "./src/routes/auth.js";
+import chatRoutes from "./src/routes/chat.js";
+import directMessageRoutes from "./src/routes/directMessages.js";
+import friendsRoutes from "./src/routes/friends.js";
+import invitesRoutes from "./src/routes/invites.js";
+import notificationRoutes from "./src/routes/notifications.js";
+import profileRoutes from "./src/routes/profile.js";
+import serversRoutes from "./src/routes/servers.js";
 
 const app = express();
 
