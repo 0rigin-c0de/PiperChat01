@@ -110,9 +110,11 @@ function Login() {
   const [alert_message, setalert_message] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const url = import.meta.env.VITE_URL;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isValidEmail = emailRegex.test(user_values.email.trim());
 
   const canSubmit = useMemo(
-    () => user_values.email.trim().length > 0 && user_values.password.length > 0,
+    () => user_values.email.trim().length > 0 && isValidEmail && user_values.password.length > 0,
     [user_values.email, user_values.password]
   );
 
