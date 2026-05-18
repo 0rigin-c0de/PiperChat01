@@ -195,7 +195,7 @@ function Register() {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
   ];
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
 
   const canSubmit = useMemo(
     () =>
@@ -228,7 +228,7 @@ function Register() {
     e.preventDefault();
 
     if (!url) {
-      setalert_message("Missing REACT_APP_URL. Check frontend/.env.");
+      setalert_message("Missing VITE_URL. Check frontend/.env.");
       setalert_box(true);
       return;
     }

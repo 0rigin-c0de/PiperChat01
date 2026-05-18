@@ -1,11 +1,11 @@
 import socketIO from "socket.io-client";
-
 // Vite shims process.env via vite.config.js → falls back to VITE_API_URL.
 // Use a safe fallback so the module never crashes on import even if the
 // env var is missing or the backend is temporarily down.
 const url =
-  process.env.REACT_APP_URL ||
+  import.meta.env.VITE_URL ||
   import.meta.env.VITE_API_URL ||
+  process.env.REACT_APP_URL ||
   "http://localhost:2000";
 
 const socket = socketIO(url, {

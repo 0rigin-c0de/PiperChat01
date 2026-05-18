@@ -6,7 +6,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 
 export default [
   {
-    ignores: ["dist/**", "node_modules/**"],
+    ignores: ["dist/**", "node_modules/**", "vite.config.js.timestamp-*.mjs"],
   },
   js.configs.recommended,
   {

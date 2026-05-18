@@ -10,7 +10,7 @@ import { resolveProfilePic, handleImageError } from "../../../shared/imageFallba
 
 function ValidChat() {
   const dispatch = useDispatch();
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
   const { server_id } = useParams();
 
   // channel creds from redux
@@ -31,8 +31,13 @@ function ValidChat() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    socket.emit("join_chat", channel_id);
-  }, [channel_id]);
+    if(socket && channel_id){
+      socket.emit("join_chat", {
+        channel_id: channel_id,
+        server_id: server_id
+      })
+    }
+  }, [channel_id,server_id]);
 
   const sendNow = async () => {
     if (!chat_message.trim()) return;
@@ -209,7 +214,7 @@ function ValidChat() {
         )
       );
     };
-
+    //earlier it was server_message_receive which was wrong
     socket.on("server_message_received", handleReceiveMessage);
     socket.on("server_message_updated", handleUpdatedMessage);
     socket.on("server_message_deleted", handleDeletedMessage);

@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import socket from "../socket/Socket";
@@ -41,9 +41,17 @@ function NotificationListener() {
   const dispatch = useDispatch();
   const location = useLocation();
   const userId = useSelector((state) => state.user_info.id);
+  const notificationPrefs = useSelector((state) => state.user_info.notification_preferences);
   const activeFriend = useSelector((state) => state.direct_message.activeFriend);
   const activeChannelId = useSelector((state) => state.currentPage.page_id);
-  const url = import.meta.env.VITE_API_URL || process.env.REACT_APP_URL;
+  const url =
+    import.meta.env.VITE_URL ||
+    import.meta.env.VITE_API_URL ||
+    process.env.REACT_APP_URL ||
+    "http://localhost:2000";
+
+  const canReceiveDMs = notificationPrefs?.direct_messages ?? true;
+  const canReceiveServerMessages = notificationPrefs?.server_messages ?? true;
 
   const pathParts = location.pathname.split("/");
   const activeServerId = pathParts[2];
@@ -133,6 +141,44 @@ function NotificationListener() {
   }, [userId, fetchUnreadSummary, dispatch]);
 
   // ─── Effect 2: DM and server message notifications ────────────────────────
+
+  const prevPrefsRef = useRef(notificationPrefs);
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    const prev = prevPrefsRef.current;
+    const reEnabled =
+      (prev?.direct_messages === false && canReceiveDMs) ||
+      (prev?.server_messages === false && canReceiveServerMessages);
+
+    if (reEnabled) {
+      const res = fetch(`${url}/unread_summary`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      }).then((r) => r.json());
+      res.then((data) => {
+        if (data.status === 200) {
+          dispatch(set_unread_summary(data.summary));
+        }
+      });
+    }
+
+    prevPrefsRef.current = notificationPrefs;
+  }, [
+    userId,
+    url,
+    dispatch,
+    notificationPrefs,
+    canReceiveDMs,
+    canReceiveServerMessages,
+  ]);
+
   useEffect(() => {
     /**
      * handleDmNotification
@@ -162,6 +208,8 @@ function NotificationListener() {
         );
         return;
       }
+
+      if (!canReceiveDMs) return;
 
       dispatch(increment_dm_unread({ friend_id }));
     };
@@ -196,6 +244,8 @@ function NotificationListener() {
         return;
       }
 
+      if (!canReceiveServerMessages) return;
+
       dispatch(increment_server_unread({ server_id, channel_id }));
     };
 
@@ -206,7 +256,7 @@ function NotificationListener() {
       socket.off("direct_message_notification", handleDmNotification);
       socket.off("server_message_notification", handleServerNotification);
     };
-  }, [activeFriend, activeServerId, activeChannelId, isDashboard, url, dispatch]);
+  }, [activeFriend, activeServerId, activeChannelId, isDashboard, canReceiveDMs, canReceiveServerMessages, url, dispatch]);
 
   return null;
 }

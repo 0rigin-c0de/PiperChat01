@@ -123,19 +123,26 @@ export default function AuthShell({ children}) {
               ].map((item) => (
                 <motion.div
                   key={item.label}
-                  whileHover={{ y: -3, scale: 1.02 }}
+                  whileHover={{
+                        y: -5,
+                        scale: 1.03,
+                        boxShadow: "0 12px 30px rgba(124,58,237,0.18)"
+                  }}
                   transition={{ duration: 0.2 }}
-                  className="rounded-2xl p-4 cursor-default"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.07)",
+                  className="rounded-2xl p-4 cursor-pointer hover:border-violet-400/30"
+                  style={{ 
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                    transition: "all 0.3s ease",
+
                   }}
                 >
                   <div className="text-xl mb-2">{item.icon}</div>
                   <div className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.85)" }}>
                     {item.label}
                   </div>
-                  <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.65))" }}>
                     {item.sub}
                   </div>
                 </motion.div>
