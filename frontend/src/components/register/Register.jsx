@@ -180,12 +180,14 @@ function Register() {
   const [otp_alert_box, setotp_alert_box] = useState(false);
   const [otp_alert_message, setotp_alert_message] = useState("");
   const [date_validation, setdate_validation] = useState(false);
+  const [password_validation, setpassword_validation] = useState(false);
   const [user_values, setuser_values] = useState({
     date_value: "",
     year_value: "",
     month_value: "",
     username: "",
     password: "",
+    confirm_password: "",
     email: "",
   });
   const [submitting, setSubmitting] = useState(false);
@@ -202,6 +204,7 @@ function Register() {
       user_values.email.trim().length > 0 &&
       user_values.username.trim().length > 0 &&
       user_values.password.length > 0 &&
+      user_values.confirm_password.length > 0 &&
       user_values.date_value !== "" &&
       user_values.month_value !== "" &&
       user_values.year_value !== "",
@@ -209,6 +212,10 @@ function Register() {
   );
 
   const handle_user_values = (e) => {
+    const { name } = e.target;
+    if ((name === "password" || name === "confirm_password") && password_validation) {
+      setpassword_validation(false);
+    }
     setuser_values((v) => ({ ...v, [e.target.name]: e.target.value }));
   };
 
@@ -224,6 +231,8 @@ function Register() {
     setdays(daysList);
   }, []);
 
+
+
   const register_req = async (e) => {
     e.preventDefault();
     var dob = `${user_values.month_value} ${user_values.date_value} , ${user_values.year_value}`;
@@ -238,8 +247,11 @@ function Register() {
 
     if (Number(user_values.date_value) !== day) {
       setdate_validation(true);
+    } else if (user_values.password !== user_values.confirm_password) {
+      setpassword_validation(true);
     } else {
       setdate_validation(false);
+      setpassword_validation(false);
       const { email, password, username } = user_values;
       try {
         setSubmitting(true);
@@ -420,6 +432,37 @@ function Register() {
               <p className="mt-1.5 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
                 Minimum 7 characters.
               </p>
+            </div>
+
+            <div>
+              <Label>Confirm Password</Label>
+              <StyledInput
+                name="confirm_password"
+                type="password"
+                autoComplete="new-password"
+                value={user_values.confirm_password}
+                onChange={handle_user_values}
+                required
+                disabled={submitting || verifying}
+                placeholder="Confirm your password"
+              />
+              <AnimatePresence>
+                {password_validation && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="mt-2 rounded-xl px-3 py-2 text-xs"
+                    style={{
+                      background: "rgba(239,68,68,0.15)",
+                      border: "1px solid rgba(239,68,68,0.4)",
+                      color: "#ff6b6b",
+                    }}
+                  >
+                    Confirm password entered is wrong
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Date of Birth */}
