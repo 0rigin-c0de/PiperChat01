@@ -1,70 +1,73 @@
 import "./config/env.js";
-import cors from "cors";
-import express from "express";
-import { Server as SocketIOServer } from "socket.io";
 
+import app from "./server.js";
+import { Server as SocketIOServer } from "socket.io";
 import { connect } from "./config/db.js";
-import authRoutes from "./routes/auth.js";
-import chatRoutes from "./routes/chat.js";
-import directMessageRoutes from "./routes/directMessages.js";
-import friendsRoutes from "./routes/friends.js";
-import invitesRoutes from "./routes/invites.js";
-import notificationRoutes from "./routes/notifications.js";
-import profileRoutes from "./routes/profile.js";
-import serversRoutes from "./routes/servers.js";
 import { attachSocketHandlers } from "./socket/index.js";
 import { setIO } from "./socket/runtime.js";
 import { verifyMailTransport } from "./services/email.js";
 
-const port = process.env.PORT || 2000;
-const app = express();
+let server;
+const PORT = process.env.PORT || 2000;
 
-app.use(cors());
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+(async function startServer() {
+  try {
+    await connect();
+    await verifyMailTransport();
 
-app.get("/", (req, res) => {
-  res
-    .status(200)
-    .json({ success: true, message: "Server is up and running!", status: "ok" });
-});
+    server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log("Database connected successfully");
+    });
 
-app.use("/", authRoutes);
-app.use("/", friendsRoutes);
-app.use("/", serversRoutes);
-app.use("/", invitesRoutes);
-app.use("/", chatRoutes);
-app.use("/", directMessageRoutes);
-app.use("/", notificationRoutes);
-app.use("/", profileRoutes);
+    const allowedOrigins = (
+      process.env.FRONTEND_ORIGINS ||
+      "http://localhost:3000,http://localhost:5173"
+    )
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
 
-async function start() {
-  await connect();
-  await verifyMailTransport();
-  const server = app.listen(port, () => {
-    console.log(`listening on port ${port}`);
-    console.log("Connected to DB");
-  });
+    const io = new SocketIOServer(server, {
+      pingTimeout: 20000,
+      cors: {
+        origin: allowedOrigins,
+      },
+    });
+    setIO(io);
+    attachSocketHandlers(io);
+  } catch (error) {
+    console.error("Failed to start server", error);
+    if (process.env.NODE_ENV === "production") process.exit(1);
+  }
+})();
 
-  const allowedOrigins = (
-    process.env.FRONTEND_ORIGINS ||
-    "http://localhost:3000,http://localhost:5173"
-  )
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
+// Handle graceful shutdown on termination signals
+const serverTermination = async (signal) => {
+  try {
+    // Log a warning indicating the server is shutting down
+    console.log(`${signal} received. Shutting down gracefully...`);
 
-  const io = new SocketIOServer(server, {
-    pingTimeout: 20000,
-    cors: {
-      origin: allowedOrigins,
-    },
-  });
-  setIO(io);
-  attachSocketHandlers(io);
-}
+    // Close http server
+    if (server) {
+      await new Promise((resolve, reject) => {
+        server.close((err) => {
+          if (err) return reject(err);
 
-start().catch((err) => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+          console.log("HTTP server closed");
+          resolve();
+        });
+      });
+    }
+
+    // Exit the process cleanly
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during server shutdown:", error);
+    process.exit(1);
+  }
+};
+
+// Listen for the termination signals and trigger graceful shutdown
+process.on("SIGTERM", serverTermination);
+process.on("SIGINT", serverTermination);
