@@ -95,7 +95,7 @@ async function main() {
   const app = express();
   app.use(express.json());
   app.use("/", authRoutes);
-  app.use("/", profileRoutes);
+  app.use("/profile", profileRoutes);
 
   const server = http.createServer(app);
   const baseUrl = await new Promise((resolve, reject) => {
@@ -115,7 +115,14 @@ async function main() {
     assert(r.json.token, "legacy signin missing token");
 
     const payload = decodeJwtPayload(r.json.token);
-    const required = ["id", "email", "username", "tag", "profile_pic"];
+    const required = [
+      "id",
+      "email",
+      "username",
+      "tag",
+      "profile_pic",
+      "notification_preferences",
+    ];
     for (const k of required) {
       assert(k in payload, `JWT missing field: ${k}`);
     }
@@ -129,6 +136,11 @@ async function main() {
     assert(
       payload.profile_pic === "https://example.com/legacy.png",
       "JWT profile_pic mismatch"
+    );
+    assert(
+      payload.notification_preferences &&
+        typeof payload.notification_preferences === "object",
+      "JWT notification_preferences missing"
     );
     const extra = Object.keys(payload).filter((k) => !required.includes(k));
     assert(
