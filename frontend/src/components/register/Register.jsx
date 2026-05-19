@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_BASE_URL } from "../../config";
 import {
   Dialog,
   DialogContent,
@@ -195,7 +196,7 @@ function Register() {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
   ];
-  const url = import.meta.env.VITE_URL;
+  const url = API_BASE_URL;
 
   const canSubmit = useMemo(
     () =>
@@ -244,7 +245,7 @@ function Register() {
       try {
         setSubmitting(true);
         setalert_box(false);
-        const res = await fetch(`${url}/signup`, {
+        const res = await fetch(`${url}/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, username, dob }),
@@ -287,7 +288,7 @@ function Register() {
     try {
       setVerifying(true);
       setotp_alert_box(false);
-      const res = await fetch(`${url}/verify`, {
+      const res = await fetch(`${url}/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ otp_value: otp_value.trim(), email: user_values.email }),
@@ -323,7 +324,7 @@ function Register() {
     if (!url) return;
     try {
       setVerifying(true);
-      const res = await fetch(`${url}/resend_otp`, {
+      const res = await fetch(`${url}/auth/resend_otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user_values.email }),
