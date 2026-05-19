@@ -98,7 +98,7 @@ async function propagateUserIdentity({ userId, username, profile_pic }) {
   await Promise.all(arrayUpdates);
 }
 
-router.patch("/profile", authToken, async (req, res) => {
+router.patch("/", authToken, async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -175,7 +175,7 @@ router.patch("/profile", authToken, async (req, res) => {
   }
 });
 
-router.patch("/profile/password", authToken, async (req, res) => {
+router.patch("/password", authToken, async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -223,7 +223,7 @@ router.patch("/profile/password", authToken, async (req, res) => {
   }
 });
 
-router.patch("/profile/notifications", authToken, async (req, res) => {
+router.patch("/notifications", authToken, async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

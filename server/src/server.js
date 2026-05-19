@@ -5,14 +5,7 @@ import compression from "compression";
 
 import corsOptions from "./config/cors.js";
 
-import authRoutes from "./routes/auth.js";
-import chatRoutes from "./routes/chat.js";
-import directMessageRoutes from "./routes/directMessages.js";
-import friendsRoutes from "./routes/friends.js";
-import invitesRoutes from "./routes/invites.js";
-import notificationRoutes from "./routes/notifications.js";
-import profileRoutes from "./routes/profile.js";
-import serversRoutes from "./routes/servers.js";
+import routes from "./routes/index.js";
 
 const app = express();
 
@@ -30,13 +23,6 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/", authRoutes);
-app.use("/", friendsRoutes);
-app.use("/", serversRoutes);
-app.use("/", invitesRoutes);
-app.use("/", chatRoutes);
-app.use("/", directMessageRoutes);
-app.use("/", notificationRoutes);
-app.use("/", profileRoutes);
+app.use("/api", routes);
 
 export default app;
