@@ -166,13 +166,13 @@ function Dashboard() {
   }, [dispatch]);
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-ink text-white">
+    <div className="relative h-dvh overflow-hidden bg-ink text-white">
       <div className="pointer-events-none absolute inset-0 bg-radial-glow" />
       <div className="pointer-events-none absolute inset-0 bg-grid-fade [background-size:36px_36px] opacity-15" />
 
       <div
         className={[
-          "relative mx-auto grid min-h-dvh w-full max-w-[1680px]",
+          "relative mx-auto grid h-dvh w-full max-w-[1680px]",
           "grid-rows-[56px_1fr]",
           "grid-cols-1",
           "lg:grid-cols-[72px_minmax(240px,280px)_minmax(0,1fr)]",
@@ -222,7 +222,7 @@ function Dashboard() {
           </div>
         ) : null}
 
-        <div className="col-start-1 row-start-2 min-w-0 lg:col-start-3 lg:col-span-1 lg:row-start-2">
+        <div className="col-start-1 row-start-2 min-w-0 overflow-hidden lg:col-start-3 lg:col-span-1 lg:row-start-2">
           <Main
             user_relations={{
               incoming_reqs: user_data.incoming_reqs,
