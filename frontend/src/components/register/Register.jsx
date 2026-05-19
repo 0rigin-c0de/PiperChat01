@@ -14,7 +14,7 @@ import {
 function Label({ children }) {
   return (
     <label
-      className="block text-xs font-bold tracking-widest uppercase mb-2"
+      className="block text-[11px] font-bold tracking-widest uppercase mb-1.5"
       style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em" }}
     >
       {children}
@@ -26,7 +26,7 @@ function StyledInput({ ...props }) {
   return (
     <input
       {...props}
-      className="w-full h-11 rounded-xl px-4 text-sm font-medium outline-none transition-all duration-200"
+      className="w-full h-10 rounded-xl px-4 text-sm font-medium outline-none transition-all duration-200"
       style={{
         background: "rgba(255,255,255,0.05)",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -54,7 +54,7 @@ function StyledSelect({ children, ...props }) {
   return (
     <select
       {...props}
-      className="h-11 w-full rounded-xl px-3 text-sm font-medium outline-none transition-all duration-200 cursor-pointer"
+      className="h-10 w-full rounded-xl px-3 text-sm font-medium outline-none transition-all duration-200 cursor-pointer"
       style={{
         background: "rgba(255,255,255,0.05)",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -89,7 +89,7 @@ function PrimaryButton({ children, disabled, ...props }) {
       whileTap={!disabled ? { scale: 0.985 } : {}}
       transition={{ duration: 0.15 }}
       disabled={disabled}
-      className="w-full h-12 rounded-xl text-sm font-bold tracking-wide transition-all duration-200"
+      className="w-full h-11 rounded-xl text-sm font-bold tracking-wide transition-all duration-200"
       style={{
         background: disabled
           ? "rgba(255,255,255,0.06)"
@@ -113,7 +113,7 @@ function GhostButton({ children, disabled, ...props }) {
   return (
     <button
       disabled={disabled}
-      className="h-10 px-4 rounded-xl text-sm font-semibold transition-all duration-200"
+      className="h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200"
       style={{
         background: "transparent",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -367,18 +367,18 @@ function Register() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="space-y-5"
+          className="space-y-3.5"
         >
           {/* Header */}
-          <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex flex-col items-center gap-2 text-center">
             <div>
               <h1
-                className="text-2xl font-black tracking-tight"
+                className="text-[1.7rem] font-black tracking-tight leading-none"
                 style={{ color: "#f0f0f5" }}
               >
                 Create your account
               </h1>
-              <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
                 Join PiperChat in under a minute
               </p>
             </div>
@@ -390,7 +390,7 @@ function Register() {
           )}
 
           {/* Form */}
-          <form onSubmit={register_req} className="space-y-4" noValidate>
+          <form onSubmit={register_req} className="space-y-3" noValidate>
             <div>
               <Label>Email</Label>
               <StyledInput
@@ -429,52 +429,54 @@ function Register() {
                 disabled={submitting || verifying}
                 placeholder="At least 7 characters"
               />
-              <p className="mt-1.5 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <p className="mt-1 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
                 Minimum 7 characters.
               </p>
             </div>
 
             <div>
               <Label>Confirm Password</Label>
-              <StyledInput
-                name="confirm_password"
-                type="password"
-                autoComplete="new-password"
-                value={user_values.confirm_password}
-                onChange={handle_user_values}
-                required
-                disabled={submitting || verifying}
-                placeholder="Confirm your password"
-              />
-              <AnimatePresence>
-                {password_validation && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    className="mt-2 rounded-xl px-3 py-2 text-xs"
-                    style={{
-                      background: "rgba(239,68,68,0.15)",
-                      border: "1px solid rgba(239,68,68,0.4)",
-                      color: "#ff6b6b",
-                    }}
-                  >
-                    Confirm password entered is wrong
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div className="space-y-1.5">
+                <StyledInput
+                  name="confirm_password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={user_values.confirm_password}
+                  onChange={handle_user_values}
+                  required
+                  disabled={submitting || verifying}
+                  placeholder="Confirm your password"
+                />
+                <AnimatePresence>
+                  {password_validation && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      className="rounded-xl px-3 py-1 text-[10px] leading-tight"
+                      style={{
+                        background: "rgba(239,68,68,0.15)",
+                        border: "1px solid rgba(239,68,68,0.4)",
+                        color: "#ff6b6b",
+                      }}
+                    >
+                      Confirm password entered is wrong
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Date of Birth */}
             <div
-              className="rounded-2xl p-4"
+              className="rounded-2xl p-3"
               style={{
                 background: "rgba(255,255,255,0.02)",
                 border: "1px solid rgba(255,255,255,0.07)",
               }}
             >
               <Label>Date of Birth</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 <StyledSelect
                   name="date_value"
                   value={user_values.date_value}
@@ -525,7 +527,7 @@ function Register() {
                 <motion.div
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 rounded-xl px-3 py-2 text-xs"
+                  className="mt-2 rounded-xl px-3 py-1.5 text-[11px]"
                   style={{
                     background: "rgba(234,179,8,0.08)",
                     border: "1px solid rgba(234,179,8,0.2)",
