@@ -35,6 +35,39 @@ PiperChat is a Discord-style chat app with:
 - `server/` → Express + MongoDB + Socket.IO API (ESM)
 - `frontend/` → Vite + Tailwind UI
 
+## System Architecture
+
+To help contributors understand the data flow, here is the technical visualization of how PiperChat components interact:
+
+```mermaid
+graph TD
+    %% User and Frontend
+    User((User)) -->|Interacts| UI[Vite + React Frontend]
+    
+    %% Connection Layer
+    UI <-->|Real-time Events| Socket[Socket.io Layer]
+    UI -->|HTTP Requests| API[Express API]
+
+    %% Backend Logic
+    subgraph "Server Logic (Node.js)"
+        API
+        Socket
+        Auth[JWT Authentication]
+        Email[Resend Email Service]
+    end
+
+    %% Database Layer
+    Socket <-->|Caching/Presence| Redis[(Redis)]
+    API -->|Chat History & Users| Mongo[(MongoDB)]
+    Email -->|Send OTP| ResendService[(Resend API)]
+
+    %% Styling
+    style UI fill:#9b5de5,stroke:#333,stroke-width:2px,color:#fff
+    style Redis fill:#FF4438,color:#fff
+    style Mongo fill:#47A248,color:#fff
+    style ResendService fill:#f39c12,stroke:#333,stroke-width:2px,color:#fff
+```
+
 ## Quick start
 
 ### 1) Install dependencies
