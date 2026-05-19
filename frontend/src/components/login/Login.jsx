@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE_URL } from "../../config";
 
 
@@ -104,6 +105,7 @@ function AlertBanner({ message, onClose }) {
 }
 
 function Login() {
+  const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const Navigate = useNavigate();
   const [user_values, setuser_values] = useState({ email: "", password: "" });
@@ -204,13 +206,13 @@ function Login() {
             />
           </div>
 
-          <div>
+          <div className="relative">
             <div className="flex items-center justify-between mb-2">
               <Label>Password</Label>
-            </div>
+            </div>            
             <StyledInput
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               value={user_values.password}
               onChange={handle_user_values}
@@ -218,6 +220,15 @@ function Login() {
               disabled={submitting}
               placeholder="••••••••"
             />
+            <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-[70%] -translate-y-1/2"
+                style={{cursor : 'pointer'}}
+              >
+                {showPassword ? ( <FiEyeOff size={14} style={{ color: "var(--text-secondary)" }} />) : (
+                  <FiEye size={14} style={{ color: "var(--text-secondary)" }} />)}
+              </button>
           </div>
 
           <div className="pt-1">

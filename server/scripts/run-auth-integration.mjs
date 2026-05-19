@@ -123,6 +123,7 @@ async function main() {
       "profile_pic",
       "notification_preferences",
     ];
+    const jwtAllowedExtra = new Set(["iat", "exp"]);
     for (const k of required) {
       assert(k in payload, `JWT missing field: ${k}`);
     }
@@ -137,14 +138,19 @@ async function main() {
       payload.profile_pic === "https://example.com/legacy.png",
       "JWT profile_pic mismatch"
     );
-    assert(
-      payload.notification_preferences &&
-        typeof payload.notification_preferences === "object",
-      "JWT notification_preferences missing"
-    );
+    const prefs = payload.notification_preferences;
+    assert(prefs && typeof prefs === "object", "JWT notification_preferences missing");
+    for (const key of [
+      "direct_messages",
+      "friend_requests",
+      "server_messages",
+      "server_invites",
+    ]) {
+      assert(prefs[key] === true, `JWT notification_preferences.${key} should default true`);
+    }
     const extra = Object.keys(payload).filter((k) => !required.includes(k));
     assert(
-      extra.every((k) => k === "iat" || k === "exp"),
+      extra.every((k) => jwtAllowedExtra.has(k)),
       `Unexpected JWT keys: ${extra.join(",")}`
     );
     assert(!("password" in payload), "JWT must not contain password");
