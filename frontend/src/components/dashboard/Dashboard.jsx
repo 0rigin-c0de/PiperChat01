@@ -23,11 +23,11 @@ function Dashboard() {
   const dispatch = useDispatch();
   const { server_id } = useParams();
   const isDashboard = server_id === "@me" || server_id === undefined;
-  
+
   // Select user info from Redux for real-time reactivity
-  const { 
-    username: reduxUsername, 
-    profile_pic: reduxProfilePic 
+  const {
+    username: reduxUsername,
+    profile_pic: reduxProfilePic
   } = useSelector((state) => state.user_info);
 
   const option_state = useSelector(
@@ -144,12 +144,12 @@ function Dashboard() {
       try {
         const user_creds = jwt(token);
         const { username, tag, profile_pic, id, notification_preferences } = user_creds;
-        
+
         dispatch(change_username(username));
         dispatch(change_tag(tag));
         dispatch(option_profile_pic(resolveProfilePic(profile_pic, username)));
         dispatch(option_user_id(id));
-        
+
         dispatch(
           set_notification_preferences({
             direct_messages: true,
@@ -186,10 +186,10 @@ function Dashboard() {
       >
         <div className="hidden lg:block row-span-2 row-start-1 border-r border-white/10 bg-black/35">
           <Navbar
-            user_cred={{ 
-              username: reduxUsername, 
-              profile_pic: reduxProfilePic, 
-              user_servers: user_data.servers 
+            user_cred={{
+              username: reduxUsername,
+              profile_pic: reduxProfilePic,
+              user_servers: user_data.servers
             }}
             new_req_recieved={new_req_recieved}
           />
@@ -241,10 +241,10 @@ function Dashboard() {
             <div className="flex h-dvh w-full">
               <div className="w-[72px] border-r border-white/10 bg-black/35">
                 <Navbar
-                  user_cred={{ 
-                    username: reduxUsername, 
-                    profile_pic: reduxProfilePic, 
-                    user_servers: user_data.servers 
+                  user_cred={{
+                    username: reduxUsername,
+                    profile_pic: reduxProfilePic,
+                    user_servers: user_data.servers
                   }}
                   new_req_recieved={new_req_recieved}
                   onNavigate={() => setMobileSidebarOpen(false)}
