@@ -34,7 +34,7 @@ ensureTestEnv();
 // Avoid live SMTP during automated auth tests (signup still persists user).
 config.MAIL_TRANSPORT = "console";
 
-const { connect } = await import("../src/config/db.js");
+const { connectDatabase } = await import("../src/config/db.js");
 const User = (await import("../src/models/User.js")).default;
 const authRoutes = (await import("../src/routes/auth.js")).default;
 const profileRoutes = (await import("../src/routes/profile.js")).default;
@@ -69,7 +69,7 @@ async function request(baseUrl, path, options = {}) {
 }
 
 async function main() {
-  await connect();
+  await connectDatabase();
 
   const emailPlain = `auth-itest-plain-${Date.now()}@example.com`;
   const emailNew = `auth-itest-new-${Date.now()}@example.com`;

@@ -3,7 +3,7 @@ import config from "./config/index.js";
 
 import app from "./server.js";
 import { Server as SocketIOServer } from "socket.io";
-import { connect } from "./config/db.js";
+import { connectDatabase, disconnectDatabase } from "./config/db.js";
 import { attachSocketHandlers } from "./socket/index.js";
 import { setIO } from "./socket/runtime.js";
 import { verifyMailTransport } from "./services/email.js";
@@ -14,12 +14,11 @@ let server;
 
 (async function startServer() {
   try {
-    await connect();
+    await connectDatabase();
     await verifyMailTransport();
 
     server = app.listen(config.PORT, () => {
       logger.info(`Server running on port ${config.PORT}`);
-      logger.info("Database connected successfully");
     });
 
     const io = new SocketIOServer(server, {
@@ -41,6 +40,9 @@ const serverTermination = async (signal) => {
   try {
     // Log a warning indicating the server is shutting down
     logger.warn(`${signal} received. Shutting down gracefully...`);
+
+    // Disconnect from the database
+    await disconnectDatabase();
 
     // Close http server
     if (server) {
