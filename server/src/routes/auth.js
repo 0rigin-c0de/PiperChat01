@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 import { buildAuthUserJwtPayload } from "../lib/authJwtPayload.js";
+import logger from "../lib/winston.js";
 import { authToken } from "../middleware/auth.js";
 import User from "../models/User.js";
 import { generateOTP, sendMail } from "../services/email.js";
@@ -55,7 +56,7 @@ function generateAvatar(username) {
 
     return `${config.DICEBEAR_API}/${config.DICEBEAR_STYLE}/svg?seed=${encodeURIComponent(seed)}`;
   } catch (error) {
-    console.error("Avatar generation error:", error.message);
+    logger.error(`Avatar generation error: ${error.message}`);
 
     return config.DEFAULT_PROFILE_PIC;
   }

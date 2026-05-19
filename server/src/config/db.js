@@ -1,5 +1,6 @@
 import config from "./index.js";
 import mongoose from "mongoose";
+import logger from "../lib/winston.js";
 
 mongoose.set("strictQuery", true);
 
@@ -15,8 +16,8 @@ export function connect(options = {}) {
     })
     .catch((err) => {
       if (err.message?.includes("auth")) {
-        console.error(
-          "[MongoDB] Auth failed. Check: special chars in password need URL-encoding (@ → %40, # → %23), and no spaces around = in .env"
+        logger.error(
+          "[MongoDB] Auth failed. Check: special chars in password need URL-encoding (@ -> %40, # -> %23), and no spaces around = in .env"
         );
       }
       throw err;

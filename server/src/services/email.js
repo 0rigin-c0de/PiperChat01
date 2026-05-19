@@ -6,6 +6,7 @@ import {
   getOAuthClientId,
   hasGmailOAuthCredentials,
 } from "../lib/gmailOAuth.js";
+import logger from "../lib/winston.js";
 import { sendOtpViaGmailApi, verifyGmailApi } from "./gmailApiMail.js";
 
 const MAIL_MODES = {
@@ -104,12 +105,12 @@ export async function verifyMailTransport() {
   const mode = resolveMailMode();
 
   if (mode === MAIL_MODES.CONSOLE) {
-    console.log("[email] MAIL_TRANSPORT=console — OTP emails are logged only.");
+    logger.info("[email] MAIL_TRANSPORT=console — OTP emails are logged only.");
     return { ok: true, mode };
   }
 
   if (mode === MAIL_MODES.NONE) {
-    console.warn(
+    logger.warn(
       "[email] Not configured. Set MAIL_TRANSPORT=gmail_api and Gmail OAuth env vars."
     );
     return { ok: false, mode, reason: "mail_not_configured" };
@@ -118,23 +119,23 @@ export async function verifyMailTransport() {
   if (mode === MAIL_MODES.GMAIL_API) {
     const result = await verifyGmailApi();
     if (result.ok) {
-      console.log(`[email] Gmail API ready as ${result.address}`);
+      logger.info(`[email] Gmail API ready as ${result.address}`);
       return { ok: true, mode };
     }
-    console.error(`[email] Gmail API verification failed: ${result.reason}`);
-    if (result.hint) console.error(`[email] ${result.hint}`);
+    logger.error(`[email] Gmail API verification failed: ${result.reason}`);
+    if (result.hint) logger.error(`[email] ${result.hint}`);
     return { ok: false, mode, ...result };
   }
 
   const transporter = createNodemailerTransporter(mode);
   try {
     await transporter.verify();
-    console.log(`[email] SMTP ready (${mode}) as ${getMailUser()}`);
+    logger.info(`[email] SMTP ready (${mode}) as ${getMailUser()}`);
     return { ok: true, mode };
   } catch (error) {
-    console.error(`[email] SMTP verify failed (${mode}):`, error.message);
+    logger.error(`[email] SMTP verify failed (${mode}): ${error.message}`);
     if (error.code === "ETIMEDOUT") {
-      console.error(
+      logger.error(
         "[email] SMTP is blocked on this host. Use MAIL_TRANSPORT=gmail_api with OAuth2."
       );
     }
@@ -146,7 +147,7 @@ async function sendMail(otp, mailValue, nameValue) {
   const mode = resolveMailMode();
 
   if (mode === MAIL_MODES.CONSOLE) {
-    console.log(`[email:console] OTP for ${mailValue}: ${otp}`);
+    logger.info(`[email:console] OTP for ${mailValue}: ${otp}`);
     return { ok: true, mode, simulated: true };
   }
 
@@ -156,7 +157,7 @@ async function sendMail(otp, mailValue, nameValue) {
 
   const transporter = createNodemailerTransporter(mode);
   if (!transporter) {
-    console.warn("[email] Mail not configured.");
+    logger.warn("[email] Mail not configured.");
     return { ok: false, reason: "mail_not_configured", mode };
   }
 
@@ -166,9 +167,9 @@ async function sendMail(otp, mailValue, nameValue) {
     );
     return { ok: true, mode, messageId: info.messageId };
   } catch (error) {
-    console.error(`[email] Send failed (${mode}):`, error.message);
+    logger.error(`[email] Send failed (${mode}): ${error.message}`);
     if (error.code === "ETIMEDOUT") {
-      console.error(
+      logger.error(
         "[email] Use MAIL_TRANSPORT=gmail_api (SMTP ports are often blocked in production)."
       );
     }

@@ -3,6 +3,7 @@ import config from "../config/index.js";
 import express from "express";
 import jwt from "jsonwebtoken";
 
+import logger from "../lib/winston.js";
 import User from "../models/User.js";
 import {
   addFriend,
@@ -158,7 +159,7 @@ router.get("/user_relations", async (req, res) => {
       servers: result.servers || [],
     });
   } catch (err) {
-    console.error("Error fetching user relations:", err);
+    logger.error(`Error fetching user relations: ${err.message}`);
     res.status(500).json({ message: "Something went wrong", status: 500 });
   }
 });

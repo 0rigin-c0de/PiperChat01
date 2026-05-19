@@ -1,5 +1,6 @@
 import config from "../config/index.js";
 import { createClient } from "redis";
+import logger from "./winston.js";
 
 const redisUrl =
   config.REDIS_URL ||
@@ -15,14 +16,14 @@ async function getRedis() {
   if (!redisConnectPromise) {
     const client = createClient({ url: redisUrl });
     client.on("error", (err) => {
-      console.warn("[redis] client error:", err?.message || err);
+      logger.warn(`[redis] client error: ${err?.message || err}`);
     });
 
     redisConnectPromise = client
       .connect()
       .then(() => client)
       .catch((err) => {
-        console.warn("[redis] connect failed:", err?.message || err);
+        logger.warn(`[redis] connect failed: ${err?.message || err}`);
         redisConnectPromise = null;
         return null;
       });

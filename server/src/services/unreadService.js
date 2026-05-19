@@ -1,4 +1,5 @@
 import config from "../config/index.js";
+import logger from "../lib/winston.js";
 
 let createClient = null;
 
@@ -39,12 +40,12 @@ async function getRedisClient() {
       try {
         const client = createClient({ url });
         client.on("error", (error) => {
-          console.error("Redis error:", error.message);
+          logger.error(`Redis error: ${error.message}`);
         });
         await client.connect();
         return client;
       } catch (error) {
-        console.error("Redis connection failed:", error.message);
+        logger.error(`Redis connection failed: ${error.message}`);
         return null;
       }
     })();

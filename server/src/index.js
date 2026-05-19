@@ -8,7 +8,7 @@ import { attachSocketHandlers } from "./socket/index.js";
 import { setIO } from "./socket/runtime.js";
 import { verifyMailTransport } from "./services/email.js";
 
-import { logtail } from "./lib/winston.js";
+import logger, { logtail } from "./lib/winston.js";
 
 let server;
 
@@ -18,8 +18,8 @@ let server;
     await verifyMailTransport();
 
     server = app.listen(config.PORT, () => {
-      console.log(`Server running on port ${config.PORT}`);
-      console.log("Database connected successfully");
+      logger.info(`Server running on port ${config.PORT}`);
+      logger.info("Database connected successfully");
     });
 
     const io = new SocketIOServer(server, {
@@ -31,7 +31,7 @@ let server;
     setIO(io);
     attachSocketHandlers(io);
   } catch (error) {
-    console.error("Failed to start server", error);
+    logger.error(`Failed to start server: ${error.message}`);
     if (config.NODE_ENV === "production") process.exit(1);
   }
 })();
@@ -40,7 +40,7 @@ let server;
 const serverTermination = async (signal) => {
   try {
     // Log a warning indicating the server is shutting down
-    console.log(`${signal} received. Shutting down gracefully...`);
+    logger.warn(`${signal} received. Shutting down gracefully...`);
 
     // Close http server
     if (server) {
@@ -48,19 +48,21 @@ const serverTermination = async (signal) => {
         server.close((err) => {
           if (err) return reject(err);
 
-          console.log("HTTP server closed");
+          logger.info("HTTP server closed");
           resolve();
         });
       });
     }
 
     // Flush any remaining log to Logtail before exiting
-    logtail.flush();
+    if (logtail) {
+      await logtail.flush();
+    }
 
     // Exit the process cleanly
     process.exit(0);
   } catch (error) {
-    console.error("Error during server shutdown:", error);
+    logger.error(`Error during server shutdown: ${error.message}`);
     process.exit(1);
   }
 };
