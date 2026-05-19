@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import {
   Dialog,
   DialogContent,
@@ -192,6 +193,7 @@ function Register() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -421,7 +423,7 @@ function Register() {
               <Label>Password</Label>
               <StyledInput
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 value={user_values.password}
                 onChange={handle_user_values}
