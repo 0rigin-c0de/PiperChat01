@@ -194,7 +194,6 @@ function Register() {
   const [submitting, setSubmitting] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const months = [
     "January", "February", "March", "April", "May", "June",
