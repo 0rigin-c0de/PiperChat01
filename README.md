@@ -53,19 +53,19 @@ graph TD
         API
         Socket
         Auth[JWT Authentication]
-        Email[Resend Email Service]
+        Email[Gmail OAuth2 Email Service]
     end
 
     %% Database Layer
     Socket <-->|Caching/Presence| Redis[(Redis)]
     API -->|Chat History & Users| Mongo[(MongoDB)]
-    Email -->|Send OTP| ResendService[(Resend API)]
+    Email -->|Send OTP via Gmail| GoogleOAuth[(Google OAuth2 API)]
 
     %% Styling
     style UI fill:#9b5de5,stroke:#333,stroke-width:2px,color:#fff
     style Redis fill:#FF4438,color:#fff
     style Mongo fill:#47A248,color:#fff
-    style ResendService fill:#f39c12,stroke:#333,stroke-width:2px,color:#fff
+    style GoogleOAuth fill:#4285F4,stroke:#333,stroke-width:2px,color:#fff
 ```
 
 ## Quick start
