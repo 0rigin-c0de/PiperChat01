@@ -11,6 +11,8 @@ import { getChats } from "../services/chatService.js";
 import { incrementServerUnread } from "../services/unreadService.js";
 import { getIO } from "../socket/runtime.js";
 
+import expressRateLimit from "../middleware/rateLimit.js";
+
 const router = express.Router();
 
 async function shouldSendNotification(userId, preferenceKey) {
@@ -33,7 +35,7 @@ function getAuthorizedUser(req, res) {
   }
 }
 
-router.post("/store_message", async (req, res) => {
+router.post("/store_message", expressRateLimit("chat"), async (req, res) => {
   const {
     message,
     server_id,

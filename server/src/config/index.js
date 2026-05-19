@@ -37,6 +37,8 @@ const config = {
   OTP_TTL_MS,
   UPSTASH_REDIS_URL: process.env.UPSTASH_REDIS_URL,
   UPSTASH_REDIS_TLS_URL: process.env.UPSTASH_REDIS_TLS_URL,
+  RATE_LIMIT_WINDOW_MS:
+    Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
 };
 
 export default config;

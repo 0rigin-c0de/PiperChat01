@@ -15,6 +15,8 @@ import {
   updatingCreds,
 } from "../services/userService.js";
 
+import expressRateLimit from "../middleware/rateLimit.js";
+
 const router = express.Router();
 
 function looksLikeBcryptHash(storedPassword) {
@@ -63,7 +65,7 @@ router.post("/verify_route", authToken, (req, res) => {
   res.status(201).json({ message: "authorized", status: 201 });
 });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", expressRateLimit("auth"), async (req, res) => {
   const { email, username, password, dob } = req.body;
   const authorized = false;
 
@@ -179,7 +181,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/verify", async (req, res) => {
+router.post("/verify", expressRateLimit("otp"), async (req, res) => {
   const { email } = req.body;
   const otpValue = String(req.body.otp_value || "").trim();
 
@@ -220,7 +222,7 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-router.post("/resend_otp", async (req, res) => {
+router.post("/resend_otp", expressRateLimit("otp"), async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -249,7 +251,7 @@ router.post("/resend_otp", async (req, res) => {
   }
 });
 
-router.post("/signin", async (req, res) => {
+router.post("/signin", expressRateLimit("auth"), async (req, res) => {
   try {
     const email = req.body.email;
     const plainPassword = req.body.password;
