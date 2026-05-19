@@ -8,6 +8,8 @@ import { attachSocketHandlers } from "./socket/index.js";
 import { setIO } from "./socket/runtime.js";
 import { verifyMailTransport } from "./services/email.js";
 
+import { logtail } from "./lib/winston.js";
+
 let server;
 
 (async function startServer() {
@@ -51,6 +53,9 @@ const serverTermination = async (signal) => {
         });
       });
     }
+
+    // Flush any remaining log to Logtail before exiting
+    logtail.flush();
 
     // Exit the process cleanly
     process.exit(0);

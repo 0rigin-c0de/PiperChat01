@@ -39,6 +39,8 @@ const config = {
   UPSTASH_REDIS_TLS_URL: process.env.UPSTASH_REDIS_TLS_URL,
   RATE_LIMIT_WINDOW_MS:
     Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  LOGTAIL_SOURCE_TOKEN: process.env.LOGTAIL_SOURCE_TOKEN,
+  LOGTAIL_INGESTING_HOST: process.env.LOGTAIL_INGESTING_HOST,
 };
 
 export default config;
