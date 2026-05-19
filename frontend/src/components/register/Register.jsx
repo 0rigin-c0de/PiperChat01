@@ -3,7 +3,6 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import AuthShell from "../auth/AuthShell";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import {
   Dialog,
   DialogContent,
