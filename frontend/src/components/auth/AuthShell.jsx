@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 
-export default function AuthShell({ children}) {
+export default function AuthShell({ children, mode }) {
+  const isRegister = mode === "register";
+
   return (
     <div
-      className="relative min-h-dvh overflow-hidden"
+      className={`relative overflow-hidden ${isRegister ? "h-dvh" : "min-h-dvh"}`}
       style={{ background: "#0a0a0f" }}
     >
       <div
@@ -62,7 +64,11 @@ export default function AuthShell({ children}) {
         }}
       />
 
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl items-center px-5 py-12">
+      <div
+        className={`relative mx-auto flex w-full max-w-6xl items-center px-5 ${
+          isRegister ? "h-dvh py-8" : "min-h-dvh py-12"
+        }`}
+      >
         <div className="grid w-full items-center gap-12 lg:grid-cols-2 lg:gap-16">
 
           <motion.section
@@ -123,19 +129,26 @@ export default function AuthShell({ children}) {
               ].map((item) => (
                 <motion.div
                   key={item.label}
-                  whileHover={{ y: -3, scale: 1.02 }}
+                  whileHover={{
+                        y: -5,
+                        scale: 1.03,
+                        boxShadow: "0 12px 30px rgba(124,58,237,0.18)"
+                  }}
                   transition={{ duration: 0.2 }}
-                  className="rounded-2xl p-4 cursor-default"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.07)",
+                  className="rounded-2xl p-4 cursor-pointer hover:border-violet-400/30"
+                  style={{ 
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                    transition: "all 0.3s ease",
+
                   }}
                 >
                   <div className="text-xl mb-2">{item.icon}</div>
                   <div className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.85)" }}>
                     {item.label}
                   </div>
-                  <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.65))" }}>
                     {item.sub}
                   </div>
                 </motion.div>

@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Hash, Pencil, Trash2, Save, SendHorizontal } from "lucide-react";
+import { Hash, Pencil, Trash2, Save, SendHorizontal, Loader2, AlertCircle } from "lucide-react";
 import socket from "../../socket/Socket";
 import { useParams } from "react-router-dom";
 import { clear_channel_unread } from "../../../store/unreadSlice";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
+import { resolveProfilePic, handleImageError } from "../../../shared/imageFallbacks";
 
 function ValidChat() {
   const dispatch = useDispatch();
-  const url = process.env.REACT_APP_URL;
+  const url = import.meta.env.VITE_URL;
   const { server_id } = useParams();
 
   // channel creds from redux
@@ -23,13 +24,20 @@ function ValidChat() {
   const id = useSelector((state) => state.user_info.id);
 
   const [chat_message, setchat_message] = useState("");
-  const [all_messages, setall_messages] = useState(null);
+  const [all_messages, setall_messages] = useState([]);
   const [editingTimestamp, setEditingTimestamp] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    socket.emit("join_chat", channel_id);
-  }, [channel_id]);
+    if(socket && channel_id){
+      socket.emit("join_chat", {
+        channel_id: channel_id,
+        server_id: server_id
+      })
+    }
+  }, [channel_id,server_id]);
 
   const sendNow = async () => {
     if (!chat_message.trim()) return;
@@ -66,6 +74,10 @@ function ValidChat() {
 
   useEffect(() => {
     if (channel_id !== "") {
+      setall_messages([]);
+      setIsLoading(true);
+      setError(null);
+
       dispatch(clear_channel_unread({ server_id, channel_id }));
       fetch(`${url}/mark_channel_read`, {
         method: "POST",
@@ -75,27 +87,37 @@ function ValidChat() {
         },
         body: JSON.stringify({ server_id, channel_id }),
       });
-      setall_messages(null);
       get_messages();
     }
     // eslint-disable-next-line
   }, [channel_id]);
 
   const get_messages = async () => {
-    const res = await fetch(`${url}/get_messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": localStorage.getItem("token"),
-      },
-      body: JSON.stringify({
-        channel_id,
-        server_id,
-      }),
-    });
-    const data = await res.json();
-    if (data.chats.length !== 0) {
-      setall_messages(data.chats);
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await fetch(`${url}/get_messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": localStorage.getItem("token"),
+        },
+        body: JSON.stringify({
+          channel_id,
+          server_id,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to load messages");
+      }
+
+      const data = await res.json();
+      setall_messages(data.chats ? data.chats : []);
+    } catch (err) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -192,7 +214,7 @@ function ValidChat() {
         )
       );
     };
-
+    //earlier it was server_message_receive which was wrong
     socket.on("server_message_received", handleReceiveMessage);
     socket.on("server_message_updated", handleUpdatedMessage);
     socket.on("server_message_deleted", handleDeletedMessage);
@@ -207,8 +229,34 @@ function ValidChat() {
   return (
     <div className="flex h-full min-w-0 flex-col">
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-soft backdrop-blur-xl">
-          <div className="flex items-center gap-3">
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-300" />
+          </div>
+        ) : error ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <AlertCircle className="h-10 w-10 text-red-400" />
+            <div className="text-white/80">{error}</div>
+            <Button variant="outline" onClick={get_messages}>
+              Retry
+            </Button>
+          </div>
+        ) : all_messages && all_messages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-white/5">
+              <Hash className="h-8 w-8 text-brand-300" />
+            </div>
+            <div className="text-2xl font-extrabold tracking-tight text-white">
+              Welcome to #{channel_name}!
+            </div>
+            <div className="text-white/60">
+              This is the start of the #{channel_name} channel. Send a message to start the conversation!
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-soft backdrop-blur-xl">
+              <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/5">
               <Hash className="h-5 w-5 text-brand-300" />
             </div>
@@ -223,7 +271,7 @@ function ValidChat() {
           </div>
         </div>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-5 space-y-1.5 sm:space-y-2">
           {(all_messages || []).map((elem) => {
             const date = new Date(Number(elem.timestamp));
             const timestamp = `${date.toDateString()}, ${String(
@@ -236,22 +284,23 @@ function ValidChat() {
             return (
               <div
                 key={`${elem.timestamp}-${elem.sender_id}`}
-                className="group -mx-2 flex gap-3 rounded-2xl px-2 py-2 transition hover:bg-white/5"
+                className="group flex gap-2 rounded-2xl px-1 py-1.5 transition hover:bg-white/5 sm:gap-3 sm:px-2 sm:py-2"
               >
-                <div className="relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+                <div className="relative mt-4 h-9 w-9 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:mt-3 sm:h-10 sm:w-10">
                   <img
-                    src={elem.sender_pic}
+                    src={resolveProfilePic(elem.sender_pic, elem.sender_name)}
                     alt=""
                     className="h-full w-full object-cover"
+                    onError={handleImageError}
                   />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
                     <div className="text-sm font-extrabold text-white/85">
                       {elem.sender_name}
                     </div>
-                    <div className="text-xs font-semibold text-white/45">
+                    <div className="text-[10px] leading-none text-white/35">
                       {timestamp}
                     </div>
                     {mine ? (
@@ -290,7 +339,13 @@ function ValidChat() {
                           if (e.key === "Enter" && editingContent.trim()) {
                             editMessage(elem);
                           }
+                          // GSSoC Fix: Close edit mode on Escape key press
+                          if (e.key === "Escape") {
+                            setEditingTimestamp(null);
+                            setEditingContent("");
+                          }
                         }}
+                        autoFocus
                       />
                       <Button
                         type="button"
@@ -303,7 +358,7 @@ function ValidChat() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-white/85">
+                    <div className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-[1.45] text-white/85">
                       {elem.content}
                     </div>
                   )}
@@ -312,6 +367,8 @@ function ValidChat() {
             );
           })}
         </div>
+        </>
+        )}
       </div>
 
       <div className="border-t border-white/10 bg-black/25 p-3">

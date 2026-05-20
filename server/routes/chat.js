@@ -4,11 +4,23 @@ import jwt from "jsonwebtoken";
 import Chat from "../models/Chat.js";
 import Server from "../models/Server.js";
 import Message from "../models/Message.js";
+import User from "../models/User.js";
 import * as cache from "../lib/cache.js";
 import { incrementServerUnread } from "../services/unreadService.js";
 import { getIO } from "../socket/runtime.js";
 
 const router = express.Router();
+
+async function shouldSendNotification(userId, preferenceKey) {
+  try {
+    const user = await User.findById(userId).lean();
+    if (!user) return false;
+    const prefs = user.notification_preferences || {};
+    return prefs[preferenceKey] !== false;
+  } catch {
+    return true;
+  }
+}
 
 function getAuthorizedUser(req, res) {
   try {
@@ -52,12 +64,15 @@ router.post("/store_message", async (req, res) => {
     );
     for (const recipient of recipients) {
       await incrementServerUnread(recipient.user_id, server_id, channel_id);
-      io.to(recipient.user_id).emit("server_message_notification", {
-        server_id,
-        channel_id,
-        channel_name,
-        sender_name: username,
-      });
+      const shouldNotify = await shouldSendNotification(recipient.user_id, "server_messages");
+      if (shouldNotify) {
+        io.to(recipient.user_id).emit("server_messaage_notification", {
+          server_id,
+          channel_id,
+          channel_name,
+          sender_name: username,
+        });
+      }
     }
   }
 
@@ -77,7 +92,7 @@ router.post("/store_message", async (req, res) => {
     await Chat.updateOne(
       { server_id, "channels.channel_id": channel_id },
       { $setOnInsert: { server_id, channels: [{ channel_id, channel_name }] } },
-      { upsert: true },
+      { upsert: true }
     );
 
     await cache.del(`chat:${server_id}:${channel_id}`);
@@ -101,7 +116,7 @@ router.post("/get_messages", async (req, res) => {
   if (!channel_id || !server_id) {
     return res
       .status(400)
-      .json({ error: "Invalid request. Missing channel_id or server_id." });
+      .json({ error: "Invalid request.. Missing channel_id or server_id." });
   }
 
   try {
@@ -140,7 +155,7 @@ router.post("/get_messages", async (req, res) => {
 
     return res.json({ chats });
   } catch (error) {
-    console.error("Error retrieving chats:", error);
+    console.error("Error retrieving chats: ", error);
     res.status(500).json({ error: "Failed to retrieve chats." });
   }
 });
@@ -164,14 +179,14 @@ router.post("/edit_server_message", async (req, res) => {
     if (!updatedMsg) {
       return res
         .status(404)
-        .json({ status: 404, message: "Message not found" });
+        .json({ status: 404, message: "Message isn't found" });
     }
 
     await cache.del(`chat:${server_id}:${channel_id}`);
 
     const io = getIO();
     if (io) {
-      io.to(channel_id).emit("server_message_updated", {
+      io.to(`channel:${channel_id}`).emit("server_message_updated", {
         timestamp,
         sender_id: user.id,
         content: updatedMsg.content,
@@ -211,13 +226,13 @@ router.post("/delete_server_message", async (req, res) => {
 
     const io = getIO();
     if (io) {
-      io.to(channel_id).emit("server_message_deleted", {
+      io.to(`channel:${channel_id}`).emit("server_message_deleted", {
         timestamp,
         sender_id: user.id,
       });
     }
 
-    res.status(200).json({ status: 200, message: "Message deleted" });
+    res.status(200).json({ status: 200, message: "Message is deleted" });
   } catch (error) {
     console.error("Error deleting message:", error);
     res.status(500).json({ status: 500, message: "Failed to delete message" });

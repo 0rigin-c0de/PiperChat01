@@ -1,17 +1,17 @@
 import person_icon from "../../../images/friends.svg";
 import { Plus, Search } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { resolveProfilePic } from "../../../shared/imageFallbacks";
+import { resolveProfilePic, handleImageError } from "../../../shared/imageFallbacks";
 import { open_direct_message } from "../../../store/directMessageSlice";
 
 function Navbar2_dashboard({ friends = [], onNavigate }) {
   const dispatch = useDispatch();
   const unreadDm = useSelector((state) => state.unread.dm);
   const onlineUsers = useSelector((state) => state.presence.byId);
-  const profile_pic = resolveProfilePic(
-    useSelector((state) => state.user_info.profile_pic),
-    "Dummy friend"
-  );
+  
+  const username = useSelector((state) => state.user_info.username);
+  const rawProfilePic = useSelector((state) => state.user_info.profile_pic);
+  const profile_pic = resolveProfilePic(rawProfilePic, username);
 
   return (
     <div className="flex h-full flex-col">
@@ -56,6 +56,7 @@ function Navbar2_dashboard({ friends = [], onNavigate }) {
                   src={profile_pic}
                   alt=""
                   className="h-full w-full object-cover"
+                  onError={handleImageError}
                 />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 z-10 h-3.5 w-3.5 rounded-full border-2 border-panel2 bg-white/15" />
@@ -85,6 +86,7 @@ function Navbar2_dashboard({ friends = [], onNavigate }) {
                       src={resolveProfilePic(friend.profile_pic, friend.username)}
                       alt=""
                       className="h-full w-full object-cover"
+                      onError={handleImageError}
                     />
                   </div>
                   <span

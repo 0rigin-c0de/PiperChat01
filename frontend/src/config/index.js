@@ -1,2 +1,1 @@
-export const API_BASE_URL = process.env.REACT_APP_URL || "";
-
+export const API_BASE_URL = import.meta.env.VITE_URL || "";

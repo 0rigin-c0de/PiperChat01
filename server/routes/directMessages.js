@@ -10,6 +10,17 @@ import { getIO } from "../socket/runtime.js";
 
 const router = express.Router();
 
+async function shouldSendNotification(userId, preferenceKey) {
+  try {
+    const user = await User.findById(userId).lean();
+    if (!user) return false;
+    const prefs = user.notification_preferences || {};
+    return prefs[preferenceKey] !== false;
+  } catch {
+    return true;
+  }
+}
+
 function getAuthorizedUser(req, res) {
   try {
     return jwt.verify(req.headers["x-auth-token"], process.env.ACCESS_TOKEN);
@@ -99,7 +110,7 @@ router.post("/send_direct_message", async (req, res) => {
   const friend = await User.findOne({ _id: friend_id }).lean();
 
   if (!currentUser || !friend) {
-    return res.status(404).json({ message: "User not found", status: 404 });
+    return res.status(404).json({ message: "User isn't found", status: 404 });
   }
 
   const isFriend = (currentUser.friends || []).some(
@@ -108,7 +119,7 @@ router.post("/send_direct_message", async (req, res) => {
   if (!isFriend) {
     return res
       .status(403)
-      .json({ message: "Users are not friends", status: 403 });
+      .json({ message: "Users aren't friends", status: 403 });
   }
 
   const currentUserId = String(currentUser._id);
@@ -152,7 +163,7 @@ router.post("/send_direct_message", async (req, res) => {
 
       io.to(friendUserId).emit("direct_message_received", socketMessage);
 
-      socketMessage.friend_id = friendUserId; // Update for sender
+      socketMessage.friend_id = friendUserId;
       io.to(currentUserId).emit("direct_message_received", socketMessage);
 
       io.to(friendUserId).emit("direct_message_notification", {
@@ -173,6 +184,7 @@ router.post("/send_direct_message", async (req, res) => {
         timestamp: newMessage.timestamp,
       },
     });
+
   } catch (error) {
     console.error("Error sending DM:", error);
     return res.status(500).json({ message: "Server error", status: 500 });
